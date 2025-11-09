@@ -35,7 +35,11 @@ class Mailing(models.Model):
     clients = models.ManyToManyField(Client)
 
     def __str__(self):
-        return self.message
+        return self.status
+
+    class Meta:
+        verbose_name = 'Рассылка'
+        verbose_name_plural = 'Рассылки'
 
 
 class MailingLog(models.Model):
@@ -45,4 +49,8 @@ class MailingLog(models.Model):
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.status
+        return self.server_response
+
+    class Meta:
+        verbose_name = 'Попытка рассылки'
+        verbose_name_plural = 'Попытки рассылок'
