@@ -1,0 +1,47 @@
+[
+{
+    "model": "mailing.client",
+    "pk": 1,
+    "fields": {
+        "email": "ivanov@example.com",
+        "name": "Иван Иванов",
+        "comment": "Постоянный клиент"
+    }
+},
+{
+    "model": "mailing.client",
+    "pk": 2,
+    "fields": {
+        "email": "petrova@example.com",
+        "name": "Анна Петрова",
+        "comment": "Подписана на новости"
+    }
+},
+{
+    "model": "mailing.client",
+    "pk": 3,
+    "fields": {
+        "email": "sidorov@example.com",
+        "name": "Павел Сидоров",
+        "comment": "Активный покупатель"
+    }
+},
+{
+    "model": "mailing.client",
+    "pk": 4,
+    "fields": {
+        "email": "smirnova@example.com",
+        "name": "Ольга Смирнова",
+        "comment": "Иногда откликается на акции"
+    }
+},
+{
+    "model": "mailing.client",
+    "pk": 5,
+    "fields": {
+        "email": "volkov@example.com",
+        "name": "Дмитрий Волков",
+        "comment": "Тестовый клиент"
+    }
+}
+]
