@@ -10,7 +10,6 @@ packages = [{ include = "sky_mailing_service" }]
 python = ">=3.13,<4.0"
 django = ">=5.2.8,<6.0.0"
 python-dotenv = "^1.2.1"
-psycopg = "^3.2.12"
 psycopg2-binary = "^2.9.11"
 pillow = "^12.0.0"
 ipython = "^9.7.0"

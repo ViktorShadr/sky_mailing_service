@@ -15,8 +15,8 @@ class Client(models.Model):
 
 
 class Message(models.Model):
-    subject = models.CharField(max_length=255)
-    body = models.TextField(max_length=255)
+    subject = models.CharField('Тема',max_length=255)
+    body = models.TextField('Тело письма',max_length=255)
 
     def __str__(self):
         return self.subject

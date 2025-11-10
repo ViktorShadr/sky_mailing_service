@@ -1,7 +1,16 @@
 from django.views.generic import TemplateView
 
+from mailing.models import Mailing, Client
+
 
 class MailingTemplateView(TemplateView):
     template_name = "mailing/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_mailings'] = Mailing.objects.count()
+        context['active_mailings'] = Mailing.objects.filter(status='started').count()
+        context['unique_clients'] = Client.objects.count()
+        return context
 
 
