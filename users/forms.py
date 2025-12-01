@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 
 from users.models import User
 
+
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(
         required=True,
@@ -41,17 +42,16 @@ class UserRegistrationForm(UserCreationForm):
             raise forms.ValidationError("Пользователь с таким email уже зарегистрирован")
         return email
 
-    def form_valid(self, form):
-        user = form.save()
-        login(self.request, user)
-        self.send_welcome_email(user.email)
-        return super().form_valid(form)
-
-    def send_welcome_email(self, user_email):
-        subject = 'Добро пожаловать в наш магазин'
-        message = 'Спасибо, что зарегистрировались в SkySport!'
-        recipient_list = [user_email]
-        send_mail(subject, message, from_email=os.getenv('FROM_EMAIL'), recipient_list=recipient_list)
+    def save(self, commit=True):
+        """
+        Создаём пользователя неактивным, чтобы он не мог войти
+        до подтверждения email
+        """
+        user = super().save(commit=False)
+        user.is_active = False
+        if commit:
+            user.save()
+        return user
 
 
 class UserLoginForm(AuthenticationForm):
@@ -80,9 +80,3 @@ class UserProfileForm(forms.ModelForm):
             "avatar": forms.FileInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
         }
-
-
-
-
-
-
