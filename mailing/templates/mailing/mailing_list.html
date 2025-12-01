@@ -1,0 +1,114 @@
+{% extends "mailing/base.html" %}
+{% load static %}
+
+{% block title %}Рассылки — SkyMail{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Рассылки</h1>
+    <a href="#" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Создать рассылку
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-send-fill text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted">Всего рассылок</h6>
+                        <h3 class="mb-0 fw-bold">1,234</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted">Активные</h6>
+                        <h3 class="mb-0 fw-bold">856</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-pause-fill text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted">На паузе</h6>
+                        <h3 class="mb-0 fw-bold">378</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Название</th>
+                        <th>Статус</th>
+                        <th>Дата создания</th>
+                        <th>Получателей</th>
+                        <th>Открытий</th>
+                        <th class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Example row -->
+                    <tr>
+                        <td>Акция недели</td>
+                        <td><span class="badge bg-success">Активна</span></td>
+                        <td>01.01.2023</td>
+                        <td>1,245</td>
+                        <td>856 <small class="text-muted">(68.8%)</small></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="#" class="btn btn-outline-primary" title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-success" title="Запустить">
+                                    <i class="bi bi-play-fill"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-warning" title="Приостановить">
+                                    <i class="bi bi-pause-fill"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-danger" title="Удалить">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Add more rows dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Назад</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#">Вперед</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
