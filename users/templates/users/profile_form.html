@@ -32,11 +32,11 @@
             </div>
 
             <!-- Чекбокс удаления текущего аватара -->
-            {% if form.avatar.field.widget.input_type == "file" %}
+            {% if 'delete_avatar' in form %}
                 <div class="form-check mb-4">
-                    <input type="checkbox" name="clear_avatar" id="clear_avatar" class="form-check-input">
-                    <label for="clear_avatar" class="form-check-label">
-                        Удалить текущий аватар
+                    {{ form.delete_avatar }}
+                    <label for="{{ form.delete_avatar.id_for_label }}" class="form-check-label">
+                        {{ form.delete_avatar.help_text }}
                     </label>
                 </div>
             {% endif %}

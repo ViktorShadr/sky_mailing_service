@@ -72,11 +72,34 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    delete_avatar = forms.BooleanField(
+        required=False,
+        label="Удалить аватар",
+        help_text="Отметьте, чтобы удалить текущий аватар",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )
+    
     class Meta:
         model = User
         fields = ("avatar", "phone")
-
         widgets = {
             "avatar": forms.FileInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Не показываем поле delete_avatar, если у пользователя нет аватара
+        if not self.instance.avatar:
+            self.fields.pop('delete_avatar', None)
+    
+    def save(self, commit=True):
+        # Если отмечено удаление аватара, удаляем файл и очищаем поле
+        if self.cleaned_data.get('delete_avatar'):
+            # Удаляем файл аватара, если он существует
+            if self.instance.avatar:
+                self.instance.avatar.delete(save=False)
+            # Очищаем поле аватара
+            self.instance.avatar = None
+        
+        return super().save(commit)

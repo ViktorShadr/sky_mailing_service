@@ -31,9 +31,8 @@ class CustomRegistrationView(CreateView):
     success_url = reverse_lazy("users:registration_done")
 
     def form_valid(self, form):
-        # здесь CreateView сам вызывает form.save()
         response = super().form_valid(form)
-        user = self.object  # только что созданный пользователь (is_active=False)
+        user = self.object
         self.send_confirmation_email(user)
         return response
 
@@ -65,14 +64,14 @@ class RegistrationDoneView(TemplateView):
 
 class ConfirmEmailView(TemplateView):
     template_name = "users/confirm_email.html"
-    
+
     def get_success_url(self):
         return reverse('users:login') + '?email_confirmed=1'
 
     def get(self, request, *args, **kwargs):
         uidb64 = kwargs.get("uidb64")
         token = kwargs.get("token")
-        
+
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
