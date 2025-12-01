@@ -1,4 +1,5 @@
 <!--_menu.html-->
+{% load static %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="/">SkyMail</a>
@@ -27,16 +28,16 @@
                        data-bs-toggle="dropdown"
                        aria-expanded="false">
                         <!-- Аватар пользователя -->
-                        <img
-                                src="{% if user.avatar %}{{ user.avatar.url }}{% else %} https://ui-avatars.com/api/?name=background=0D8ABC&color=fff}{% endif %}"
-                                alt="Аватар"
-                                class="rounded-circle me-2"
-                                width="32"
-                                height="32"
-                        >
-                        <span>{{ user.email }}</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <img
+                            src="{% if user.avatar %}{{ user.avatar.url }}{% else %}{% static 'img/default_avatar.png' %}{% endif %}"
+                            alt="Аватар"
+                            class="rounded-circle me-2"
+                            width="32"
+                            height="32"
+                    >
+                    <span>{{ user.email }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li>
                             <a class="dropdown-item" href="{% url 'users:profile_detail' %}">
                                 Профиль
@@ -58,9 +59,8 @@
             </ul>
             {% else %}
             <div class="d-flex">
-                <a href="{% url 'users:login' %}" class="btn btn-outline-light">
-                    Войти
-                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light me-2">Войти</a>
+                <a href="{% url 'users:registration' %}" class="btn btn-primary">Регистрация</a>
             </div>
             {% endif %}
         </div>
