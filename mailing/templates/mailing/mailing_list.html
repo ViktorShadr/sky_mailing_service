@@ -12,7 +12,7 @@
     </a>
 </div>
 
-{# Статистика по рассылкам (опционально, можно пробросить из вьюхи) #}
+<!--Статистика по рассылкам-->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
         <div class="row g-3">
@@ -71,7 +71,6 @@
                 {% for mailing in mailings %}
                 <tr>
                     <td>
-                        {# предполагаю, что в Message есть поле subject #}
                         {{ mailing.message.subject|default:"(без темы)" }}
                     </td>
 
@@ -122,7 +121,7 @@
     </div>
 </div>
 
-{# Пагинация #}
+<!--Пагинация-->
 {% if is_paginated %}
 <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
@@ -138,7 +137,7 @@
         </li>
         {% endif %}
 
-        {# Номера страниц #}
+        <!--Номера страниц-->
         {% for page_num in paginator.page_range %}
         {% if page_obj.number == page_num %}
         <li class="page-item active">
@@ -151,7 +150,7 @@
         {% endif %}
         {% endfor %}
 
-        {# Вперёд #}
+        <!--Вперед-->
         {% if page_obj.has_next %}
         <li class="page-item">
             <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
