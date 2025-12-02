@@ -1,3 +1,4 @@
+<!--mailing_list.html-->
 {% extends "mailing/base.html" %}
 {% load static %}
 
@@ -11,6 +12,7 @@
     </a>
 </div>
 
+{# Статистика по рассылкам (опционально, можно пробросить из вьюхи) #}
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
         <div class="row g-3">
@@ -21,7 +23,7 @@
                     </div>
                     <div>
                         <h6 class="mb-0 text-muted">Всего рассылок</h6>
-                        <h3 class="mb-0 fw-bold">1,234</h3>
+                        <h3 class="mb-0 fw-bold">{{ total_mailings|default:"0" }}</h3>
                     </div>
                 </div>
             </div>
@@ -31,19 +33,19 @@
                         <i class="bi bi-check-circle-fill text-success fs-4"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 text-muted">Активные</h6>
-                        <h3 class="mb-0 fw-bold">856</h3>
+                        <h6 class="mb-0 text-muted">Запущенные</h6>
+                        <h3 class="mb-0 fw-bold">{{ started_mailings|default:"0" }}</h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="d-flex align-items-center">
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
-                        <i class="bi bi-pause-fill text-warning fs-4"></i>
+                    <div class="bg-secondary bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-flag-fill text-secondary fs-4"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 text-muted">На паузе</h6>
-                        <h3 class="mb-0 fw-bold">378</h3>
+                        <h6 class="mb-0 text-muted">Завершённые</h6>
+                        <h3 class="mb-0 fw-bold">{{ finished_mailings|default:"0" }}</h3>
                     </div>
                 </div>
             </div>
@@ -56,59 +58,111 @@
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr>
-                        <th>Название</th>
-                        <th>Статус</th>
-                        <th>Дата создания</th>
-                        <th>Получателей</th>
-                        <th>Открытий</th>
-                        <th class="text-end">Действия</th>
-                    </tr>
+                <tr>
+                    <th>Сообщение</th>
+                    <th>Статус</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Получателей</th>
+                    <th class="text-end">Действия</th>
+                </tr>
                 </thead>
                 <tbody>
-                    <!-- Example row -->
-                    <tr>
-                        <td>Акция недели</td>
-                        <td><span class="badge bg-success">Активна</span></td>
-                        <td>01.01.2023</td>
-                        <td>1,245</td>
-                        <td>856 <small class="text-muted">(68.8%)</small></td>
-                        <td class="text-end">
-                            <div class="btn-group btn-group-sm">
-                                <a href="#" class="btn btn-outline-primary" title="Редактировать">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-success" title="Запустить">
-                                    <i class="bi bi-play-fill"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-warning" title="Приостановить">
-                                    <i class="bi bi-pause-fill"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger" title="Удалить">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Add more rows dynamically -->
+                {% for mailing in mailings %}
+                <tr>
+                    <td>
+                        {# предполагаю, что в Message есть поле subject #}
+                        {{ mailing.message.subject|default:"(без темы)" }}
+                    </td>
+
+
+                    <td>
+                        {% if mailing.status == "started" %}
+                        <span class="badge bg-success">{{ mailing.get_status_display }}</span>
+                        {% elif mailing.status == "finished" %}
+                        <span class="badge bg-secondary">{{ mailing.get_status_display }}</span>
+                        {% elif mailing.status == "created" %}
+                        <span class="badge bg-light text-dark">{{ mailing.get_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-light text-dark">Неизвестно</span>
+                        {% endif %}
+                    </td>
+
+
+                    <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
+                    <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
+
+
+                    <td>{{ mailing.clients.count }}</td>
+
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="#" class="btn btn-outline-primary" title="Редактировать">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-success" title="Запустить">
+                                <i class="bi bi-play-fill"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-danger" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-3 text-muted">
+                        Рассылки ещё не созданы.
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Pagination -->
+{# Пагинация #}
+{% if is_paginated %}
 <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
-        <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Назад</a>
-        </li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
+
+        {# Назад #}
+        {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="#">Вперед</a>
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
         </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Назад</span>
+        </li>
+        {% endif %}
+
+        {# Номера страниц #}
+        {% for page_num in paginator.page_range %}
+        {% if page_obj.number == page_num %}
+        <li class="page-item active">
+            <span class="page-link">{{ page_num }}</span>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        {# Вперёд #}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Вперёд</span>
+        </li>
+        {% endif %}
+
     </ul>
 </nav>
+{% endif %}
 {% endblock %}

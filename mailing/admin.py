@@ -23,11 +23,11 @@ class MailingLogInline(admin.TabularInline):
 
 @admin.register(Mailing)
 class MailingAdmin(admin.ModelAdmin):
-    list_display = ('date_start', 'date_end', 'status', 'message', 'clients_list')
+    list_display = ('start_time', 'end_time', 'status', 'message', 'clients_list')
     list_filter = ('status',)
     search_fields = ('message__subject',)
     filter_horizontal = ('clients',)
-    inlines = [MailingLogInline]
+
 
     def clients_list(self, obj):
         return ", ".join([client.email for client in obj.clients.all()])

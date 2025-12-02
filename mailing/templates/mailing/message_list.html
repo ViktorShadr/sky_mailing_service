@@ -1,3 +1,4 @@
+<!--message_list.html-->
 {% extends "mailing/base.html" %}
 {% load static %}
 
@@ -18,19 +19,25 @@
                 <thead class="table-light">
                     <tr>
                         <th>Тема</th>
-                        <th>Статус</th>
-                        <th>Дата создания</th>
-                        <th>Кол-во получателей</th>
+                        <th>Тело письма</th>
+                        <th>Используется в рассылках</th>
                         <th class="text-end">Действия</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Example row -->
+
+                    {% for message in messages %}
                     <tr>
-                        <td>Акция недели</td>
-                        <td><span class="badge bg-success">Активно</span></td>
-                        <td>01.01.2023</td>
-                        <td>1,245</td>
+                        <td>{{ message.subject }}</td>
+
+                        <td class="text-muted small">
+                            {{ message.body|truncatechars:80 }}
+                        </td>
+
+                        <td>
+                            {{ message.mailing_set.count }}
+                        </td>
+
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">
                                 <a href="#" class="btn btn-outline-primary" title="Редактировать">
@@ -45,25 +52,61 @@
                             </div>
                         </td>
                     </tr>
-                    <!-- Add more rows dynamically -->
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-3 text-muted">
+                            Сообщений ещё нет.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Pagination -->
+{# Пагинация #}
+{% if is_paginated %}
 <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
-        <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Назад</a>
-        </li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
+
+        {# Назад #}
+        {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="#">Вперед</a>
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
         </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Назад</span>
+        </li>
+        {% endif %}
+
+        {# Страницы #}
+        {% for page_num in paginator.page_range %}
+            {% if page_obj.number == page_num %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Вперёд #}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Вперёд</span>
+        </li>
+        {% endif %}
+
     </ul>
 </nav>
+{% endif %}
 {% endblock %}
