@@ -72,9 +72,9 @@ class Mailing(models.Model):
 
 
 class MailingLog(models.Model):
-    date = models.DateTimeField(auto_now_add=True)
+    attempt_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=(('success', 'Успешно'), ('failed', 'Не успешно')))
-    server_response = models.TextField(max_length=255)
+    server_response = models.TextField()
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
 
     def __str__(self):
