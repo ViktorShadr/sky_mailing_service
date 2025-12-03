@@ -1,11 +1,16 @@
 from django.db import models
 from django.utils import timezone
 
+from users.models import User
+
 
 class Client(models.Model):
     email = models.CharField(unique=True, max_length=255)
     name = models.CharField(max_length=255)
     comment = models.TextField(max_length=255)
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=True, null=True, related_name="clients", verbose_name="Владелец клиента"
+    )
 
     def __str__(self):
         return self.name
@@ -13,11 +18,21 @@ class Client(models.Model):
     class Meta:
         verbose_name = "Клиент"
         verbose_name_plural = "Клиенты"
+        permissions = [
+            ("mailing.view_client", "Может просматривать клиентов"),
+            ("mailing.add_client", "Может добавлять клиентов"),
+            ("mailing.change_client", "Может редактировать клиентов"),
+            ("mailing.delete_client", "Может удалять клиентов"),
+        ]
 
 
 class Message(models.Model):
     subject = models.CharField("Тема", max_length=255)
     body = models.TextField("Тело письма", max_length=255)
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=True, null=True, related_name="messages",
+        verbose_name="Владелец сообщения"
+    )
 
     def __str__(self):
         return self.subject
@@ -30,6 +45,9 @@ class Message(models.Model):
 class Mailing(models.Model):
     start_time = models.DateTimeField("Дата и время начала отправки")
     end_time = models.DateTimeField("Дата и время окончания отправки")
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=True, null=True, related_name="mailings", verbose_name="Владелец рассылки"
+    )
 
     status = models.CharField(
         max_length=20,
@@ -66,6 +84,12 @@ class Mailing(models.Model):
     class Meta:
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
+        permissions = [
+            ("mailing.view_mailing", "Может просматривать рассылки"),
+            ("mailing.add_mailing", "Может добавлять рассылки"),
+            ("mailing.change_mailing", "Может редактировать рассылки"),
+            ("mailing.delete_mailing", "Может удалять рассылки"),
+        ]
 
 
 class MailingLog(models.Model):
