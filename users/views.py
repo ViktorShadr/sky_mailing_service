@@ -1,18 +1,19 @@
-from django.contrib.auth import login
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
-from django.template.response import TemplateResponse
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.views.generic import CreateView, TemplateView, UpdateView, DeleteView, DetailView
-from django.urls import reverse_lazy, reverse
-from django.core.mail import send_mail
 import os
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import LoginView, LogoutView
+from django.core.mail import send_mail
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import reverse, reverse_lazy
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
+
 from config import settings
-from .forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+
+from .forms import UserLoginForm, UserProfileForm, UserRegistrationForm
 from .models import User
 
 
@@ -66,7 +67,7 @@ class ConfirmEmailView(TemplateView):
     template_name = "users/confirm_email.html"
 
     def get_success_url(self):
-        return reverse('users:login') + '?email_confirmed=1'
+        return reverse("users:login") + "?email_confirmed=1"
 
     def get(self, request, *args, **kwargs):
         uidb64 = kwargs.get("uidb64")

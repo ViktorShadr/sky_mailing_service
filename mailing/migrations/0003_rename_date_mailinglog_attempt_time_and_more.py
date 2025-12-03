@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mailing', '0002_remove_mailing_date_end_remove_mailing_date_start_and_more'),
+        ("mailing", "0002_remove_mailing_date_end_remove_mailing_date_start_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='mailinglog',
-            old_name='date',
-            new_name='attempt_time',
+            model_name="mailinglog",
+            old_name="date",
+            new_name="attempt_time",
         ),
         migrations.AlterField(
-            model_name='mailinglog',
-            name='server_response',
+            model_name="mailinglog",
+            name="server_response",
             field=models.TextField(),
         ),
     ]

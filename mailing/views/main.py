@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.views.generic import TemplateView
 
-from mailing.models import Mailing, Client
+from mailing.models import Client, Mailing
 
 
 class MailingTemplateView(TemplateView):
@@ -11,11 +11,11 @@ class MailingTemplateView(TemplateView):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
 
-        context['total_mailings'] = Mailing.objects.count()
-        context['active_mailings'] = Mailing.objects.filter(
-            status='started',
+        context["total_mailings"] = Mailing.objects.count()
+        context["active_mailings"] = Mailing.objects.filter(
+            status="started",
             start_time__lte=now,
             end_time__gte=now,
         ).count()
-        context['unique_clients'] = Client.objects.count()
+        context["unique_clients"] = Client.objects.count()
         return context

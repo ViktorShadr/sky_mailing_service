@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand, call_command
 
-from mailing.models import Client, Message, Mailing, MailingLog
+from mailing.models import Client, Mailing, MailingLog, Message
 
 
 class Command(BaseCommand):

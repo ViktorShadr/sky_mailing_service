@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
@@ -8,7 +8,7 @@ class CustomUserManager(BaseUserManager):
         if not email:
             raise ValueError("Email is required")
         email = self.normalize_email(email)
-        extra_fields.setdefault('is_active', False)  # Новые пользователи неактивны по умолчанию
+        extra_fields.setdefault("is_active", False)  # Новые пользователи неактивны по умолчанию
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -31,11 +31,11 @@ class User(AbstractUser):
     username = None
 
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(upload_to='users/avatars', blank=True, null=True)
+    avatar = models.ImageField(upload_to="users/avatars", blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
@@ -44,5 +44,5 @@ class User(AbstractUser):
         return self.email
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"

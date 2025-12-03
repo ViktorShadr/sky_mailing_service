@@ -1,41 +1,41 @@
 from django.contrib import admin
+
 from .models import Client, Mailing, MailingLog, Message
 
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('email', 'name', 'comment')
-    search_fields = ('email', 'name')
+    list_display = ("email", "name", "comment")
+    search_fields = ("email", "name")
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('subject', 'body')
-    search_fields = ('subject',)
+    list_display = ("subject", "body")
+    search_fields = ("subject",)
 
 
 class MailingLogInline(admin.TabularInline):
     model = MailingLog
     extra = 0
-    readonly_fields = ('date', 'status', 'server_response')
+    readonly_fields = ("date", "status", "server_response")
     can_delete = False
 
 
 @admin.register(Mailing)
 class MailingAdmin(admin.ModelAdmin):
-    list_display = ('start_time', 'end_time', 'status', 'message', 'clients_list')
-    list_filter = ('status',)
-    search_fields = ('message__subject',)
-    filter_horizontal = ('clients',)
-
+    list_display = ("start_time", "end_time", "status", "message", "clients_list")
+    list_filter = ("status",)
+    search_fields = ("message__subject",)
+    filter_horizontal = ("clients",)
 
     def clients_list(self, obj):
         return ", ".join([client.email for client in obj.clients.all()])
 
-    clients_list.short_description = 'Клиенты'
+    clients_list.short_description = "Клиенты"
 
 
 @admin.register(MailingLog)
 class MailingLogAdmin(admin.ModelAdmin):
-    list_display = ('attempt_time', 'status', 'server_response', 'mailing')
-    list_filter = ('status',)
+    list_display = ("attempt_time", "status", "server_response", "mailing")
+    list_filter = ("status",)
