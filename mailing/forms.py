@@ -40,6 +40,10 @@ class MessageForm(forms.ModelForm):
             "body": "Текст сообщения",
         }
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
 
 class MailingForm(forms.ModelForm):
     class Meta:
@@ -65,3 +69,12 @@ class MailingForm(forms.ModelForm):
             "end_time": "Дата и время окончания",
             "status": "Статус",
         }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user is not None:
+            # Показываем только сообщения текущего пользователя
+            self.fields["message"].queryset = Message.objects.filter(owner=user)
+
+            # Показываем только клиентов текущего пользователя
+            self.fields["clients"].queryset = Client.objects.filter(owner=user)
