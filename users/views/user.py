@@ -12,9 +12,8 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
 
 from config import settings
-
-from .forms import UserLoginForm, UserProfileForm, UserRegistrationForm
-from .models import User
+from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+from users.models import User
 
 
 class CustomLoginView(LoginView):

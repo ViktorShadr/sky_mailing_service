@@ -35,6 +35,8 @@ class User(AbstractUser):
     phone = models.CharField(max_length=15, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
 
+    is_manager = models.BooleanField(default=False, verbose_name="Менеджер", help_text="Отметьте, если пользователь является менеджером")
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
