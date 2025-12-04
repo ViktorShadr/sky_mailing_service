@@ -9,7 +9,7 @@ class Client(models.Model):
     name = models.CharField(max_length=255)
     comment = models.TextField(max_length=255)
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=True, null=True, related_name="clients", verbose_name="Владелец клиента"
+        User, on_delete=models.CASCADE, blank=False, null=False, related_name="clients", verbose_name="Владелец клиента"
     )
 
     def __str__(self):
@@ -30,7 +30,7 @@ class Message(models.Model):
     subject = models.CharField("Тема", max_length=255)
     body = models.TextField("Тело письма", max_length=255)
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=True, null=True, related_name="messages",
+        User, on_delete=models.CASCADE, blank=False, null=False, related_name="messages",
         verbose_name="Владелец сообщения"
     )
 
@@ -46,7 +46,7 @@ class Mailing(models.Model):
     start_time = models.DateTimeField("Дата и время начала отправки")
     end_time = models.DateTimeField("Дата и время окончания отправки")
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=True, null=True, related_name="mailings", verbose_name="Владелец рассылки"
+        User, on_delete=models.CASCADE, blank=False, null=False, related_name="mailings", verbose_name="Владелец рассылки"
     )
 
     status = models.CharField(

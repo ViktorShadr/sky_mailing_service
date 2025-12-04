@@ -24,7 +24,6 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
         return kwargs
 
     def form_valid(self, form):
@@ -35,7 +34,7 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy("mailing:client_list")
 
 
-class ClientUpdateView(UpdateView):
+class ClientUpdateView(LoginRequiredMixin, UpdateView):
     model = Client
     form_class = ClientForm
     template_name = "mailing/client_form.html"
@@ -43,7 +42,6 @@ class ClientUpdateView(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
         return kwargs
 
     def dispatch(self, request, *args, **kwargs):
@@ -56,14 +54,13 @@ class ClientUpdateView(UpdateView):
         raise PermissionDenied
 
 
-class ClientDeleteView(DeleteView):
+class ClientDeleteView(LoginRequiredMixin, DeleteView):
     model = Client
     template_name = "mailing/client_confirm_delete.html"
     success_url = reverse_lazy("mailing:client_list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
         return kwargs
 
     def dispatch(self, request, *args, **kwargs):
