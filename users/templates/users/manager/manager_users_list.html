@@ -30,9 +30,9 @@
                     <td>{{ user.mailings_count|default:"0" }}</td>
                     <td>
                         {% if not user.is_active %}
-                          <span class="badge bg-danger">Заблокирован</span>
+                        <span class="badge bg-danger">Заблокирован</span>
                         {% else %}
-                          <span class="badge bg-success">Активен</span>
+                        <span class="badge bg-success">Активен</span>
                         {% endif %}
                     </td>
                     <td class="text-end">
@@ -54,7 +54,9 @@
         </div>
 
     </div>
-    <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
+    <a href="{% url 'users:manager_dashboard' %}" class="btn btn-primary mt-3">
+        Назад в панель менеджера
+    </a>
 
 </div>
 

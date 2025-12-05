@@ -1,13 +1,14 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, ListView, DetailView
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import TemplateView, ListView, DetailView
 
 from mailing.models import Mailing, Client
+from users.mixins import ManagerRequiredMixin
 from users.models import User
 
 
-class ManagerDashboardView(LoginRequiredMixin, TemplateView):
+class ManagerDashboardView(ManagerRequiredMixin, TemplateView):
     template_name = "users/manager/manager_dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -31,7 +32,7 @@ class ManagerDashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ManagerClientsListView(LoginRequiredMixin, ListView):
+class ManagerClientsListView(ManagerRequiredMixin, ListView):
     model = Client
     template_name = "users/manager/manager_clients_list.html"
     context_object_name = "clients"
@@ -42,7 +43,7 @@ class ManagerClientsListView(LoginRequiredMixin, ListView):
         return Client.objects.select_related("owner").all()
 
 
-class ManagerUsersListView(LoginRequiredMixin, ListView):
+class ManagerUsersListView(ManagerRequiredMixin, ListView):
     model = User
     template_name = "users/manager/manager_users_list.html"
     context_object_name = "users"
@@ -59,7 +60,7 @@ class ManagerUsersListView(LoginRequiredMixin, ListView):
         )
 
 
-class ManagerMailingsListView(LoginRequiredMixin, ListView):
+class ManagerMailingsListView(ManagerRequiredMixin, ListView):
     model = Mailing
     template_name = "users/manager/manager_mailings_list.html"
     context_object_name = "mailings"
@@ -79,8 +80,28 @@ class ManagerMailingsListView(LoginRequiredMixin, ListView):
 
         return context
 
+    def post(self, request, *args, **kwargs):
+        mailing_id = request.POST.get("mailing_id")
+        action = request.POST.get("action")
 
-class ManagerUserDetailView(LoginRequiredMixin, DetailView):
+        if mailing_id and action:
+            mailing = Mailing.objects.get(pk=mailing_id)
+
+            # Отключение
+            if action == "disable" and mailing.status == "started":
+                mailing.status = "finished"  # или "disabled", если есть такой статус
+                mailing.save()
+
+            # Включение
+            elif action == "enable" and mailing.status in ("created", "finished"):
+                mailing.status = "started"
+                mailing.save()
+
+        # После выполнения — возвращаемся на список
+        return redirect("users:manager_mailings_list")
+
+
+class ManagerUserDetailView(ManagerRequiredMixin, DetailView):
     """
     Карточка одного пользователя под шаблон manager_user_detail.html
     """
@@ -113,16 +134,17 @@ class ManagerUserDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+def is_manager(user: User) -> bool:
+    return user.is_authenticated and user.is_manager
+
+
+@user_passes_test(is_manager)
+@login_required
 def manager_toggle_block(request, pk):
-    """
-    Переключение блокировки пользователя.
-    Подключи эту вьюху к урлу 'users:manager_toggle_block'.
-    """
-    # Здесь можно добавить проверку, что текущий юзер — менеджер
-    user = get_object_or_404(
+    user_obj = get_object_or_404(
         User.objects.exclude(is_staff=True, is_superuser=True),
         pk=pk,
     )
-    user.is_active = not user.is_active
-    user.save()
+    user_obj.is_active = not user_obj.is_active
+    user_obj.save()
     return redirect("users:manager_user_detail", pk=pk)

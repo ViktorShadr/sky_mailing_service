@@ -97,22 +97,28 @@
 
                             {# Отключить рассылку #}
                             {% if mailing.status == "started" %}
-                            <form action="#" method="post" class="d-inline">
+                            <form method="post" class="d-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="mailing_id" value="{{ mailing.pk }}">
+                                <input type="hidden" name="action" value="disable">
                                 <button type="submit" class="btn btn-outline-danger">
                                     <i class="bi bi-stop-fill me-1"></i>Отключить
                                 </button>
                             </form>
+
                             {% endif %}
 
                             {# Включить рассылку #}
                             {% if mailing.status == "created" or mailing.status == "finished" %}
-                            <form action="#" method="post" class="d-inline">
+                            <form method="post" class="d-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="mailing_id" value="{{ mailing.pk }}">
+                                <input type="hidden" name="action" value="enable">
                                 <button type="submit" class="btn btn-outline-primary">
                                     <i class="bi bi-play-fill me-1"></i>Включить
                                 </button>
                             </form>
+
                             {% endif %}
 
                         </div>
@@ -130,7 +136,9 @@
             </table>
         </div>
     </div>
-    <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
+    <a href="{% url 'users:manager_dashboard' %}" class="btn btn-primary mt-3">
+        Назад в панель менеджера
+    </a>
 
 </div>
 

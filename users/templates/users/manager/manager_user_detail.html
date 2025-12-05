@@ -95,6 +95,8 @@
         </div>
 
     </div>
-    <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
+    <a href="{% url 'users:manager_users_list' %}" class="btn btn-primary mt-3">
+    Назад в список пользователей
+</a>
 </div>
 {% endblock %}

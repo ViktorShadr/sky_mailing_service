@@ -30,23 +30,23 @@
                     <td>{{ client.comment|default:"—" }}</td>
                     <td>
                         {% if client.owner %}
-                          {% if client.owner.pk %}
-                          <a href="{% url 'users:manager_user_detail' client.owner.pk %}">
-                              {{ client.owner.email }}
-                          </a>
-                          {% else %}
-                          {{ client.owner.email }}
-                          {% endif %}
+                        {% if client.owner.pk %}
+                        <a href="{% url 'users:manager_user_detail' client.owner.pk %}">
+                            {{ client.owner.email }}
+                        </a>
                         {% else %}
-                          <span class="text-muted">—</span>
+                        {{ client.owner.email }}
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">—</span>
                         {% endif %}
                     </td>
 
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
                             <button type="button"
-                               class="btn btn-outline-secondary" disabled
-                               title="Только просмотр доступен менеджеру">
+                                    class="btn btn-outline-secondary" disabled
+                                    title="Только просмотр доступен менеджеру">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -63,7 +63,9 @@
             </table>
         </div>
     </div>
-    <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
+    <a href="{% url 'users:manager_dashboard' %}" class="btn btn-primary mt-3">
+        Назад в панель менеджера
+    </a>
 
 </div>
 
