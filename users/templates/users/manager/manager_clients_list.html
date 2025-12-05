@@ -29,12 +29,15 @@
                     <td>{{ client.comment|default:"—" }}</td>
                     <td>
                         {% if client.owner %}
-                        {% if client.owner.pk %}
+                        {% if not client.owner.is_manager %}
                         <a href="{% url 'users:manager_user_detail' client.owner.pk %}">
                             {{ client.owner.email }}
                         </a>
                         {% else %}
                         {{ client.owner.email }}
+
+                        <a href="{% url 'users:profile_detail' %}">{{ client.owner.email }}</a>
+
                         {% endif %}
                         {% else %}
                         <span class="text-muted">—</span>
@@ -52,10 +55,10 @@
             </table>
         </div>
     </div>
+
     <a href="{% url 'users:manager_dashboard' %}" class="btn btn-primary mt-3">
         Назад в панель менеджера
     </a>
-
 </div>
 
 {# Пагинация #}

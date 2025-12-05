@@ -90,24 +90,13 @@
 
                     <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
                     <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
-
-
                     <td>{{ mailing.clients.count }}</td>
 
                     <td class="text-end">
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-outline-primary"
-                               title="Редактировать">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="#" class="btn btn-outline-success" title="Запустить">
-                                <i class="bi bi-play-fill"></i>
-                            </a>
-                            <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-outline-danger"
-                               title="Удалить">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
+                        <a href="{% url 'mailing:mailing_detail' mailing.pk %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-three-dots"></i> Подробнее
+                        </a>
                     </td>
                 </tr>
                 {% empty %}

@@ -1,10 +1,14 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views import View
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
 from mailing.forms import MailingForm
-from mailing.models import Mailing
+from mailing.models import Mailing, MailingLog
+from mailing.services import run_mailing
 
 
 class MailingListView(LoginRequiredMixin, ListView):
@@ -78,3 +82,50 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
             return super().dispatch(request, *args, **kwargs)
 
         raise PermissionDenied
+
+
+class MailingRunView(LoginRequiredMixin, View):
+
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk)
+
+        if mailing.owner != request.user and not request.user.is_staff:
+            messages.error(request, "У вас нет прав на запуск этой рассылки.")
+            return redirect("mailing_detail", pk=pk)
+
+        result = run_mailing(mailing)
+
+        if not result["ok"]:
+            messages.error(request, result["error"])
+        else:
+            messages.success(
+                request,
+                (
+                    f"Рассылка запущена. Всего клиентов: {result['total']}, "
+                    f"успешно: {result['success']}, с ошибками: {result['failed']}."
+                ),
+            )
+
+        return redirect("mailing:mailing_list")
+
+
+class MailingDetailView(LoginRequiredMixin, DetailView):
+    model = Mailing
+    template_name = "mailing/mailing_detail.html"
+    context_object_name = "mailing"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser:
+            return qs
+        return qs.filter(owner=user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mailing = self.object
+
+        logs = MailingLog.objects.filter(mailing=mailing).order_by("-attempt_time")
+        context["logs"] = logs
+        return context

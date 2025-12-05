@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -46,7 +47,8 @@ class Mailing(models.Model):
     start_time = models.DateTimeField("Дата и время начала отправки")
     end_time = models.DateTimeField("Дата и время окончания отправки")
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=False, null=False, related_name="mailings", verbose_name="Владелец рассылки"
+        User, on_delete=models.CASCADE, blank=False, null=False, related_name="mailings",
+        verbose_name="Владелец рассылки"
     )
 
     status = models.CharField(
@@ -61,6 +63,20 @@ class Mailing(models.Model):
 
     message = models.ForeignKey(Message, on_delete=models.CASCADE)
     clients = models.ManyToManyField(Client)
+
+    def clean(self):
+        """
+        Проверка корректности интервала рассылки.
+        """
+        super().clean()
+
+        if self.start_time and self.end_time:
+            if self.start_time >= self.end_time:
+                raise ValidationError(
+                    {
+                        "end_time": "Дата окончания рассылки должна быть позже даты начала."
+                    }
+                )
 
     def update_status(self, save=True):
         """Пересчитывает статус на основе текущего времени и интервала."""
@@ -97,6 +113,13 @@ class MailingLog(models.Model):
     status = models.CharField(max_length=255, choices=(("success", "Успешно"), ("failed", "Не успешно")))
     server_response = models.TextField()
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="mailing_logs",
+    )
 
     def __str__(self):
         return self.server_response
