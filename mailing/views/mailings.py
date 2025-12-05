@@ -20,7 +20,7 @@ class MailingListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["total_mailings"] = Mailing.objects.filter(owner=self.request.user).count()
         context["started_mailings"] = Mailing.objects.filter(owner=self.request.user, status="started").count()
-        context["finished_mailings"] = Mailing.objects.filter(owner=self.request.user,status="finished").count()
+        context["finished_mailings"] = Mailing.objects.filter(owner=self.request.user, status="finished").count()
         return context
 
 
@@ -68,17 +68,11 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "mailing/mailing_confirm_delete.html"
     success_url = reverse_lazy("mailing:mailing_list")
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
         user = request.user
 
         is_owner = self.object.owner == user
-        # is_moderator = user.has_perm("catalog.can_delete_product")
 
         if is_owner:
             return super().dispatch(request, *args, **kwargs)

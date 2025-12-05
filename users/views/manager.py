@@ -14,18 +14,15 @@ class ManagerDashboardView(ManagerRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Берём только обычных пользователей, без админов
-        users_qs = User.objects.exclude(is_staff=True, is_superuser=True)
+        users_qs = User.objects.filter(is_manager=False).exclude(is_staff=True, is_superuser=True)
 
         context["total_users"] = users_qs.count()
         context["blocked_users"] = users_qs.filter(is_active=False).count()
         context["active_users"] = users_qs.filter(is_active=True).count()
 
-        mailings_qs = Mailing.objects.all()
+        mailings_qs = Mailing.objects.filter(owner__is_manager=False)
         context["total_mailings"] = mailings_qs.count()
 
-        # Логику можно подправить под твои статусы.
-        # Здесь считаем активными "started", а остальное считаем отключённым/неактивным.
         context["active_mailings"] = mailings_qs.filter(status="started").count()
         context["disabled_mailings"] = mailings_qs.exclude(status="started").count()
 
@@ -39,7 +36,6 @@ class ManagerClientsListView(ManagerRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Менеджер видит всех клиентов сервиса
         return Client.objects.select_related("owner").all()
 
 
@@ -51,7 +47,7 @@ class ManagerUsersListView(ManagerRequiredMixin, ListView):
 
     def get_queryset(self):
         return (
-            User.objects
+            User.objects.filter(is_manager=False)
             .exclude(is_staff=True, is_superuser=True)
             .annotate(
                 clients_count=Count("clients", distinct=True),
@@ -67,7 +63,7 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Менеджер видит все рассылки
+
         return Mailing.objects.all().prefetch_related("clients", "message")
 
     def get_context_data(self, **kwargs):
@@ -87,17 +83,15 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
         if mailing_id and action:
             mailing = Mailing.objects.get(pk=mailing_id)
 
-            # Отключение
             if action == "disable" and mailing.status == "started":
                 mailing.status = "finished"  # или "disabled", если есть такой статус
                 mailing.save()
 
-            # Включение
+
             elif action == "enable" and mailing.status in ("created", "finished"):
                 mailing.status = "started"
                 mailing.save()
 
-        # После выполнения — возвращаемся на список
         return redirect("users:manager_mailings_list")
 
 
@@ -110,9 +104,8 @@ class ManagerUserDetailView(ManagerRequiredMixin, DetailView):
     context_object_name = "view_user"
 
     def get_queryset(self):
-        # Тот же базовый queryset, что и в списке, со счётчиками
         return (
-            User.objects
+            User.objects.filter(is_manager=False)
             .exclude(is_staff=True, is_superuser=True)
             .annotate(
                 clients_count=Count("clients", distinct=True),
@@ -142,7 +135,7 @@ def is_manager(user: User) -> bool:
 @login_required
 def manager_toggle_block(request, pk):
     user_obj = get_object_or_404(
-        User.objects.exclude(is_staff=True, is_superuser=True),
+        User.objects.filter(is_manager=False).exclude(is_staff=True, is_superuser=True),
         pk=pk,
     )
     user_obj.is_active = not user_obj.is_active

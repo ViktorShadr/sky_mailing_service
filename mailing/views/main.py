@@ -10,12 +10,29 @@ class MailingTemplateView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
+        user = self.request.user
 
-        context["total_mailings"] = Mailing.objects.count()
-        context["active_mailings"] = Mailing.objects.filter(
+        if not user.is_authenticated:
+
+            mailings_qs = Mailing.objects.filter(owner__is_manager=False)
+            clients_qs = Client.objects.filter(owner__is_manager=False)
+
+        elif getattr(user, "is_manager", False):
+
+            mailings_qs = Mailing.objects.filter(owner__is_manager=False)
+            clients_qs = Client.objects.filter(owner__is_manager=False)
+
+        else:
+
+            mailings_qs = Mailing.objects.filter(owner=user)
+            clients_qs = Client.objects.filter(owner=user)
+
+        context["total_mailings"] = mailings_qs.count()
+        context["active_mailings"] = mailings_qs.filter(
             status="started",
             start_time__lte=now,
             end_time__gte=now,
         ).count()
-        context["unique_clients"] = Client.objects.count()
+        context["unique_clients"] = clients_qs.count()
+
         return context

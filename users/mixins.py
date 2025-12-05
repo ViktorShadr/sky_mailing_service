@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import redirect
+from django.core.exceptions import PermissionDenied
 
 from users.models import User
 
@@ -14,4 +14,4 @@ class ManagerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         return user.is_authenticated and user.is_manager
 
     def handle_no_permission(self):
-        return redirect("mailing:index")
+        raise PermissionDenied

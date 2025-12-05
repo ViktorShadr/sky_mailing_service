@@ -56,17 +56,11 @@ class MessageDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "mailing/message_confirm_delete.html"
     success_url = reverse_lazy("mailing:message_list")
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
         user = request.user
 
         is_owner = self.object.owner == user
-        # is_moderator = user.has_perm("mailing.can_delete_product")
 
         if is_owner:
             return super().dispatch(request, *args, **kwargs)

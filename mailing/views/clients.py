@@ -59,16 +59,11 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "mailing/client_confirm_delete.html"
     success_url = reverse_lazy("mailing:client_list")
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        return kwargs
-
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
         user = request.user
 
         is_owner = self.object.owner == user
-        # is_moderator = user.has_perm("mailing.can_delete_client")
 
         if is_owner:
             return super().dispatch(request, *args, **kwargs)
