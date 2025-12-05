@@ -28,15 +28,27 @@
                     <td>{{ client.email }}</td>
                     <td>{{ client.name }}</td>
                     <td>{{ client.comment|default:"—" }}</td>
-                    <td>{{ client.owner.email }}</td>
+                    <td>
+                        {% if client.owner %}
+                          {% if client.owner.pk %}
+                          <a href="{% url 'users:manager_user_detail' client.owner.pk %}">
+                              {{ client.owner.email }}
+                          </a>
+                          {% else %}
+                          {{ client.owner.email }}
+                          {% endif %}
+                        {% else %}
+                          <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
 
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
-                            <a href="{% url 'mailing:client_list' %}"
-                               class="btn btn-outline-secondary"
-                               title="Просмотр">
+                            <button type="button"
+                               class="btn btn-outline-secondary" disabled
+                               title="Только просмотр доступен менеджеру">
                                 <i class="bi bi-eye"></i>
-                            </a>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -51,6 +63,8 @@
             </table>
         </div>
     </div>
+    <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
+
 </div>
 
 {# Пагинация #}

@@ -3,7 +3,7 @@ from django.urls import path
 from users.views.user import CustomLoginView, CustomLogoutView, CustomRegistrationView, RegistrationDoneView, \
     ConfirmEmailView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView
 from users.views.manager import ManagerDashboardView, ManagerClientsListView, ManagerUsersListView, \
-    ManagerMailingsListView
+    ManagerMailingsListView, ManagerUserDetailView, manager_toggle_block
 
 app_name = "users"
 
@@ -20,4 +20,7 @@ urlpatterns = [
     path("manager/clients/", ManagerClientsListView.as_view(), name="manager_clients_list"),
     path("manager/users/", ManagerUsersListView.as_view(), name="manager_users_list"),
     path("manager/mailings/", ManagerMailingsListView.as_view(), name="manager_mailings_list"),
+    path("manager/user/<int:pk>/", ManagerUserDetailView.as_view(), name="manager_user_detail"),
+    path("manager/user/<int:pk>/toggle_block/", manager_toggle_block, name="manager_toggle_block"),
+
 ]

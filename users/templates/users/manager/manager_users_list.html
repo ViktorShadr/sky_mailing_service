@@ -16,9 +16,9 @@
                 <thead class="table-light">
                 <tr>
                     <th>Email</th>
-                    <th>Аватар</th>
-                    <th>Телефон</th>
-                    <th>Страна</th>
+                    <th>Клиентов</th>
+                    <th>Рассылок</th>
+                    <th>Статус</th>
                     <th class="text-end">Действия</th>
                 </tr>
                 </thead>
@@ -26,18 +26,20 @@
                 {% for user in users %}
                 <tr>
                     <td>{{ user.email }}</td>
-                    <td>{{ user.avatar }}</td>
-                    <td>{{ user.phone|default:"Не указан" }}</td>
-                    <td>{{ user.country|default:"Не указана" }}</td>
-
+                    <td>{{ user.clients_count|default:"0" }}</td>
+                    <td>{{ user.mailings_count|default:"0" }}</td>
+                    <td>
+                        {% if not user.is_active %}
+                          <span class="badge bg-danger">Заблокирован</span>
+                        {% else %}
+                          <span class="badge bg-success">Активен</span>
+                        {% endif %}
+                    </td>
                     <td class="text-end">
-                        <div class="btn-group btn-group-sm">
-                            <a href="#"
-                               class="btn btn-outline-secondary"
-                               title="Просмотр">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </div>
+                        <a href="{% url 'users:manager_user_detail' user.pk %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-eye me-1"></i>Подробнее
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
@@ -50,7 +52,10 @@
                 </tbody>
             </table>
         </div>
+
     </div>
+    <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
+
 </div>
 
 {# Пагинация #}
