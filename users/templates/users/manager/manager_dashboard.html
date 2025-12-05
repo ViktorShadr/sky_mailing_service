@@ -77,7 +77,7 @@
               Просмотр списка всех пользователей сервиса и управление блокировками.
             </p>
           </div>
-          <a href="#" class="btn btn-outline-primary mt-2">
+          <a href="{% url 'users:manager_users_list' %}" class="btn btn-outline-primary mt-2">
             Открыть список пользователей
           </a>
         </div>
@@ -93,7 +93,7 @@
               Обзор всех рассылок сервиса и отключение подозрительной активности.
             </p>
           </div>
-          <a href="#" class="btn btn-outline-primary mt-2">
+          <a href="{% url 'users:manager_mailings_list' %}" class="btn btn-outline-primary mt-2">
             Открыть все рассылки
           </a>
         </div>
@@ -106,10 +106,10 @@
           <div>
             <h5 class="card-title text-primary">Клиенты</h5>
             <p class="card-text text-muted">
-              Просмотр всех клиентов сервиса и анализ баз получателей.
+              Просмотр всех клиентов сервиса
             </p>
           </div>
-          <a href="#" class="btn btn-outline-primary mt-2">
+          <a href="{% url 'users:manager_clients_list' %}" class="btn btn-outline-primary mt-2">
             Открыть всех клиентов
           </a>
         </div>

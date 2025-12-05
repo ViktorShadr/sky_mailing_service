@@ -1,10 +1,175 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<!--manager_mailing_list.html-->
+{% extends "mailing/base.html" %}
+{% load static %}
 
-</body>
-</html>
+{% block title %}Рассылки — SkyMail{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Рассылки</h1>
+</div>
+
+<!-- Статистика -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-send-fill text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Всего рассылок</h6>
+                        <h3 class="fw-bold mb-0">{{ total_mailings|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Запущенные</h6>
+                        <h3 class="fw-bold mb-0">{{ started_mailings|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-secondary bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-flag-fill text-secondary fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Завершённые</h6>
+                        <h3 class="fw-bold mb-0">{{ finished_mailings|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Таблица -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Сообщение</th>
+                    <th>Статус</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Получателей</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for mailing in mailings %}
+                <tr>
+                    <td>{{ mailing.message.subject|default:"(без темы)" }}</td>
+
+                    <td>
+                        {% if mailing.status == "started" %}
+                        <span class="badge bg-success">{{ mailing.get_status_display }}</span>
+                        {% elif mailing.status == "finished" %}
+                        <span class="badge bg-secondary">{{ mailing.get_status_display }}</span>
+                        {% elif mailing.status == "created" %}
+                        <span class="badge bg-light text-dark">{{ mailing.get_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-light text-dark">Неизвестно</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
+                    <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
+
+                    <td>{{ mailing.clients.count }}</td>
+
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+
+                            {# Отключить рассылку #}
+                            {% if mailing.status == "started" %}
+                            <form action="#" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="bi bi-stop-fill me-1"></i>Отключить
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {# Включить рассылку #}
+                            {% if mailing.status == "created" or mailing.status == "finished" %}
+                            <form action="#" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-play-fill me-1"></i>Включить
+                                </button>
+                            </form>
+                            {% endif %}
+
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-3 text-center text-muted">
+                        Рассылки ещё не созданы.
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Назад</span>
+        </li>
+        {% endif %}
+
+        {% for page_num in paginator.page_range %}
+        {% if page_obj.number == page_num %}
+        <li class="page-item active">
+            <span class="page-link">{{ page_num }}</span>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Вперёд</span>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -2,7 +2,8 @@ from django.urls import path
 
 from users.views.user import CustomLoginView, CustomLogoutView, CustomRegistrationView, RegistrationDoneView, \
     ConfirmEmailView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView
-from users.views.manager import ManagerDashboardView
+from users.views.manager import ManagerDashboardView, ManagerClientsListView, ManagerUsersListView, \
+    ManagerMailingsListView
 
 app_name = "users"
 
@@ -16,4 +17,7 @@ urlpatterns = [
     path("profile/edit/", ProfileUpdateView.as_view(), name="profile_edit"),
     path("profile/delete/", ProfileDeleteView.as_view(), name="profile_delete"),
     path("manager/", ManagerDashboardView.as_view(), name="manager_dashboard"),
+    path("manager/clients/", ManagerClientsListView.as_view(), name="manager_clients_list"),
+    path("manager/users/", ManagerUsersListView.as_view(), name="manager_users_list"),
+    path("manager/mailings/", ManagerMailingsListView.as_view(), name="manager_mailings_list"),
 ]
