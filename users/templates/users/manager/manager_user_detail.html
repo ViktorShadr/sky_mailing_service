@@ -8,6 +8,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">Пользователь: {{ view_user.email }}</h1>
 
+    {% if perms.users.can_block_users %}
     <form action="{% url 'users:manager_toggle_block' view_user.pk %}"
           method="post" class="d-inline">
         {% csrf_token %}
