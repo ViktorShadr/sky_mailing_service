@@ -60,26 +60,26 @@ def run_mailing(mailing: Mailing) -> dict:
             failed_count += 1
             MailingLog.objects.create(
                 mailing=mailing,
-                client=client if hasattr(MailingLog, "client") else None,
+                client=client,
                 status="failed",
-                server_response=f"Exception: {exc}",
+                server_response=str(exc),
             )
         else:
             if sent == 1:
                 success_count += 1
                 MailingLog.objects.create(
                     mailing=mailing,
-                    client=client if hasattr(MailingLog, "client") else None,
+                    client=client,
                     status="success",
-                    server_response="Отправлено",
+                    server_response="OK (send_mail returned 1)",
                 )
             else:
                 failed_count += 1
                 MailingLog.objects.create(
                     mailing=mailing,
-                    client=client if hasattr(MailingLog, "client") else None,
+                    client=client,
                     status="failed",
-                    server_response="Не отправлено",
+                    server_response=f"send_mail returned {sent}",
                 )
 
     mailing.update_status()
