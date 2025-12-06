@@ -1,5 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView, ListView, DetailView
@@ -30,21 +31,24 @@ class ManagerDashboardView(ManagerRequiredMixin, TemplateView):
         return context
 
 
-class ManagerClientsListView(ManagerRequiredMixin, ListView):
+class ManagerClientsListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
     model = Client
     template_name = "users/manager/manager_clients_list.html"
     context_object_name = "clients"
     paginate_by = 10
+    permission_required = "mailing.can_view_all_clients"
 
     def get_queryset(self):
         return Client.objects.select_related("owner").all()
 
 
-class ManagerUsersListView(ManagerRequiredMixin, ListView):
+
+class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
     model = User
     template_name = "users/manager/manager_users_list.html"
     context_object_name = "users"
     paginate_by = 10
+    permission_required = "users.can_view_all_users"
 
     def get_queryset(self):
         return (
@@ -57,11 +61,13 @@ class ManagerUsersListView(ManagerRequiredMixin, ListView):
         )
 
 
+
 class ManagerMailingsListView(ManagerRequiredMixin, ListView):
     model = Mailing
     template_name = "users/manager/manager_mailings_list.html"
     context_object_name = "mailings"
     paginate_by = 10
+    permission_required = "mailing.can_view_all_mailings"
 
     def get_queryset(self):
         return Mailing.objects.all().prefetch_related("clients", "message")
@@ -105,13 +111,14 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
         return redirect("users:manager_mailings_list")
 
 
-class ManagerUserDetailView(ManagerRequiredMixin, DetailView):
+class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
     """
     Карточка одного пользователя под шаблон manager_user_detail.html
     """
     model = User
     template_name = "users/manager/manager_user_detail.html"
     context_object_name = "view_user"
+    permission_required = "users.can_view_all_users"
 
     def get_queryset(self):
         return (
@@ -122,6 +129,7 @@ class ManagerUserDetailView(ManagerRequiredMixin, DetailView):
                 mailings_count=Count("mailings", distinct=True),
             )
         )
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -140,7 +148,7 @@ class ManagerUserDetailView(ManagerRequiredMixin, DetailView):
 def is_manager(user: User) -> bool:
     return user.is_authenticated and user.is_manager
 
-
+@permission_required("users.can_block_users", raise_exception=True)
 @user_passes_test(is_manager)
 @login_required
 def manager_toggle_block(request, pk):
