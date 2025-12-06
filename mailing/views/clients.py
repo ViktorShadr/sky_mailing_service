@@ -1,23 +1,18 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from mailing.forms import ClientForm
 from mailing.models import Client
+from mailing.mixins import OwnerQuerysetMixin, OwnerAccessMixin
 
 
-class ClientListView(LoginRequiredMixin, ListView):
+class ClientListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     model = Client
     template_name = "mailing/client_list.html"
     context_object_name = "clients"
     paginate_by = 6
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.has_perm("mailing.can_view_all_clients"):
-            return Client.objects.all()
-        return Client.objects.filter(owner=self.request.user)
+    view_all_perm = "mailing.can_view_all_clients"
 
 
 class ClientCreateView(LoginRequiredMixin, CreateView):
@@ -33,38 +28,14 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy("mailing:client_list")
 
 
-class ClientUpdateView(LoginRequiredMixin, UpdateView):
+class ClientUpdateView(LoginRequiredMixin, OwnerAccessMixin, UpdateView):
     model = Client
     form_class = ClientForm
     template_name = "mailing/client_form.html"
     success_url = reverse_lazy("mailing:client_list")
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        return kwargs
 
-    def dispatch(self, request, *args, **kwargs):
-        client = self.get_object()
-        user = request.user
-
-        if client.owner == user:
-            return super().dispatch(request, *args, **kwargs)
-
-        raise PermissionDenied
-
-
-class ClientDeleteView(LoginRequiredMixin, DeleteView):
+class ClientDeleteView(LoginRequiredMixin, OwnerAccessMixin, DeleteView):
     model = Client
     template_name = "mailing/client_confirm_delete.html"
     success_url = reverse_lazy("mailing:client_list")
-
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        user = request.user
-
-        is_owner = self.object.owner == user
-
-        if is_owner:
-            return super().dispatch(request, *args, **kwargs)
-
-        raise PermissionDenied

@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -9,19 +8,15 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from mailing.forms import MailingForm
 from mailing.models import Mailing, MailingLog
 from mailing.services import run_mailing
+from mailing.mixins import OwnerQuerysetMixin, OwnerAccessMixin
 
 
-class MailingListView(LoginRequiredMixin, ListView):
+class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     model = Mailing
     template_name = "mailing/mailing_list.html"
     context_object_name = "mailings"
     paginate_by = 6
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.has_perm("mailing.can_view_all_mailings"):
-            return Mailing.objects.all()
-        return Mailing.objects.filter(owner=self.request.user)
+    view_all_perm = "mailing.can_view_all_mailings"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -51,7 +46,7 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy("mailing:mailing_list")
 
 
-class MailingUpdateView(LoginRequiredMixin, UpdateView):
+class MailingUpdateView(LoginRequiredMixin, OwnerAccessMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
     template_name = "mailing/mailing_form.html"
@@ -62,31 +57,11 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
         kwargs["user"] = self.request.user
         return kwargs
 
-    def dispatch(self, request, *args, **kwargs):
-        mailing = self.get_object()
-        user = request.user
 
-        if mailing.owner == user:
-            return super().dispatch(request, *args, **kwargs)
-
-        raise PermissionDenied
-
-
-class MailingDeleteView(LoginRequiredMixin, DeleteView):
+class MailingDeleteView(LoginRequiredMixin, OwnerAccessMixin, DeleteView):
     model = Mailing
     template_name = "mailing/mailing_confirm_delete.html"
     success_url = reverse_lazy("mailing:mailing_list")
-
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        user = request.user
-
-        is_owner = self.object.owner == user
-
-        if is_owner:
-            return super().dispatch(request, *args, **kwargs)
-
-        raise PermissionDenied
 
 
 class MailingRunView(LoginRequiredMixin, View):
@@ -114,16 +89,11 @@ class MailingRunView(LoginRequiredMixin, View):
         return redirect("mailing:mailing_list")
 
 
-class MailingDetailView(LoginRequiredMixin, DetailView):
+class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
     model = Mailing
     template_name = "mailing/mailing_detail.html"
     context_object_name = "mailing"
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.has_perm("mailing.can_view_all_mailings"):
-            return Mailing.objects.all()
-        return Mailing.objects.filter(owner=self.request.user)
+    view_all_perm = "mailing.can_view_all_mailings"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
