@@ -10,11 +10,12 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <!-- Основное меню -->
+            {% if user.is_authenticated %}
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="{% url 'mailing:message_list' %}">Сообщения</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'mailing:client_list' %}">Получатели</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'mailing:mailing_list' %}">Рассылки</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Отчёты</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'mailing:mailing_log' %}">Отчёты</a></li>
                 {% if user.is_manager %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'users:manager_dashboard' %}">Менеджер</a></li>
                 {% endif %}
@@ -22,7 +23,7 @@
             </ul>
 
             <!-- Блок пользователя -->
-            {% if user.is_authenticated %}
+
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center"
