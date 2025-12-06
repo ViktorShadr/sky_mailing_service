@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
@@ -63,7 +64,6 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-
         return Mailing.objects.all().prefetch_related("clients", "message")
 
     def get_context_data(self, **kwargs):
@@ -80,18 +80,28 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
         mailing_id = request.POST.get("mailing_id")
         action = request.POST.get("action")
 
-        if mailing_id and action:
-            mailing = Mailing.objects.get(pk=mailing_id)
+        if not mailing_id or not action:
+            messages.error(request, "Некорректный запрос.")
+            return redirect("users:manager_mailings_list")
 
-            if action == "disable" and mailing.status == "started":
-                mailing.status = "finished"  # или "disabled", если есть такой статус
-                mailing.save()
+        mailing = get_object_or_404(Mailing, pk=mailing_id)
 
+        if action == "disable":
 
-            elif action == "enable" and mailing.status in ("created", "finished"):
-                mailing.status = "started"
-                mailing.save()
+            if not request.user.has_perm("mailing.can_disable_mailings"):
+                messages.error(request, "У вас нет прав на отключение рассылок.")
+                return redirect("users:manager_mailings_list")
 
+            if mailing.status != "started":
+                messages.info(request, "Эту рассылку нельзя отключить: она не активна.")
+                return redirect("users:manager_mailings_list")
+
+            mailing.status = "finished"
+            mailing.save()
+            messages.success(request, "Рассылка отключена менеджером.")
+            return redirect("users:manager_mailings_list")
+
+        messages.error(request, "Недопустимое действие.")
         return redirect("users:manager_mailings_list")
 
 
