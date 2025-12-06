@@ -27,9 +27,9 @@ class MailingListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         qs = self.get_queryset()
 
-        context["total_mailings"] = qs.filter(owner=self.request.user).count()
-        context["started_mailings"] = qs.filter(owner=self.request.user, status="started").count()
-        context["finished_mailings"] = qs.filter(owner=self.request.user, status="finished").count()
+        context["total_mailings"] = qs.count()
+        context["started_mailings"] = qs.filter(status="started").count()
+        context["finished_mailings"] = qs.filter(status="finished").count()
         return context
 
 

@@ -68,7 +68,7 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        mailings_qs = self.object_list
+        mailings_qs = self.get_queryset()
 
         context["total_mailings"] = mailings_qs.count()
         context["started_mailings"] = mailings_qs.filter(status="started").count()
