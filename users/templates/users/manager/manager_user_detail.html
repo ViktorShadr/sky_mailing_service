@@ -22,6 +22,7 @@
         </button>
         {% endif %}
     </form>
+    {% endif %}
 </div>
 
 <div class="row g-4 mb-4">
@@ -97,7 +98,7 @@
 
     </div>
     <a href="{% url 'users:manager_users_list' %}" class="btn btn-primary mt-3">
-    Назад в список пользователей
-</a>
+        Назад в список пользователей
+    </a>
 </div>
 {% endblock %}

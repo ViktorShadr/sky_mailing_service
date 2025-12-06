@@ -12,7 +12,7 @@ class ClientListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     template_name = "mailing/client_list.html"
     context_object_name = "clients"
     paginate_by = 6
-    view_all_perm = "mailing.can_view_all_clients"
+
 
 
 class ClientCreateView(LoginRequiredMixin, CreateView):

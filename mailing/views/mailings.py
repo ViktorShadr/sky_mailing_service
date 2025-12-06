@@ -16,7 +16,7 @@ class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     template_name = "mailing/mailing_list.html"
     context_object_name = "mailings"
     paginate_by = 6
-    view_all_perm = "mailing.can_view_all_mailings"
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -93,7 +93,7 @@ class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
     model = Mailing
     template_name = "mailing/mailing_detail.html"
     context_object_name = "mailing"
-    view_all_perm = "mailing.can_view_all_mailings"
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
