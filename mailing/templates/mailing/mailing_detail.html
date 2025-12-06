@@ -102,6 +102,8 @@
                 <h5 class="card-title mb-3">Действия</h5>
 
                 <div class="d-grid gap-2">
+
+                    {% if mailing.owner == user %}
                     <a href="{% url 'mailing:mailing_update' mailing.pk %}"
                        class="btn btn-outline-primary">
                         <i class="bi bi-pencil me-1"></i> Редактировать
@@ -127,11 +129,14 @@
                        class="btn btn-outline-danger">
                         <i class="bi bi-trash me-1"></i> Удалить
                     </a>
+                    {% endif %}
+
                     <a href="{% url 'mailing:mailing_list' %}" class="btn btn-outline-secondary">
-                    Вернуться назад
+                        Вернуться назад
                     </a>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

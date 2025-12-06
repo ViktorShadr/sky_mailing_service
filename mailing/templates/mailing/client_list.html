@@ -31,6 +31,7 @@
                     <td>{{ client.name }}</td>
                     <td>{{ client.comment|default:"—" }}</td>
                     <td class="text-end">
+                        {% if client.owner == user %}
                         <div class="btn-group btn-group-sm">
                             <a href="{% url 'mailing:client_update' client.pk %}" class="btn btn-outline-primary"
                                title="Редактировать">
@@ -41,7 +42,9 @@
                                 <i class="bi bi-trash"></i>
                             </a>
                         </div>
+                        {% endif %}
                     </td>
+
                 </tr>
                 {% empty %}
                 <tr>
