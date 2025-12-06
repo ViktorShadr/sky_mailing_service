@@ -14,6 +14,9 @@ class ClientListView(LoginRequiredMixin, ListView):
     paginate_by = 6
 
     def get_queryset(self):
+        user = self.request.user
+        if user.has_perm("mailing.can_view_all_clients"):
+            return Client.objects.all()
         return Client.objects.filter(owner=self.request.user)
 
 
@@ -21,10 +24,6 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
     model = Client
     form_class = ClientForm
     template_name = "mailing/client_form.html"
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        return kwargs
 
     def form_valid(self, form):
         form.instance.owner = self.request.user

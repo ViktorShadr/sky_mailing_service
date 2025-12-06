@@ -18,13 +18,18 @@ class MailingListView(LoginRequiredMixin, ListView):
     paginate_by = 6
 
     def get_queryset(self):
+        user = self.request.user
+        if user.has_perm("mailing.can_view_all_mailings"):
+            return Mailing.objects.all()
         return Mailing.objects.filter(owner=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["total_mailings"] = Mailing.objects.filter(owner=self.request.user).count()
-        context["started_mailings"] = Mailing.objects.filter(owner=self.request.user, status="started").count()
-        context["finished_mailings"] = Mailing.objects.filter(owner=self.request.user, status="finished").count()
+        qs = self.get_queryset()
+
+        context["total_mailings"] = qs.filter(owner=self.request.user).count()
+        context["started_mailings"] = qs.filter(owner=self.request.user, status="started").count()
+        context["finished_mailings"] = qs.filter(owner=self.request.user, status="finished").count()
         return context
 
 
@@ -91,7 +96,7 @@ class MailingRunView(LoginRequiredMixin, View):
 
         if mailing.owner != request.user and not request.user.is_staff:
             messages.error(request, "У вас нет прав на запуск этой рассылки.")
-            return redirect("mailing_detail", pk=pk)
+            return redirect("mailing:mailing_detail", pk=pk)
 
         result = run_mailing(mailing)
 
@@ -115,12 +120,10 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "mailing"
 
     def get_queryset(self):
-        qs = super().get_queryset()
         user = self.request.user
-
-        if user.is_staff or user.is_superuser:
-            return qs
-        return qs.filter(owner=user)
+        if user.has_perm("mailing.can_view_all_mailings"):
+            return Mailing.objects.all()
+        return Mailing.objects.filter(owner=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

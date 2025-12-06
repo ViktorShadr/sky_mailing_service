@@ -20,10 +20,7 @@ class Client(models.Model):
         verbose_name = "Клиент"
         verbose_name_plural = "Клиенты"
         permissions = [
-            ("mailing.view_client", "Может просматривать клиентов"),
-            ("mailing.add_client", "Может добавлять клиентов"),
-            ("mailing.change_client", "Может редактировать клиентов"),
-            ("mailing.delete_client", "Может удалять клиентов"),
+            ("can_view_all_clients", "может просматривать всех клиентов"),
         ]
 
 
@@ -101,10 +98,8 @@ class Mailing(models.Model):
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
         permissions = [
-            ("mailing.view_mailing", "Может просматривать рассылки"),
-            ("mailing.add_mailing", "Может добавлять рассылки"),
-            ("mailing.change_mailing", "Может редактировать рассылки"),
-            ("mailing.delete_mailing", "Может удалять рассылки"),
+            ("can_view_all_mailings", "может просматривать все рассылки"),
+            ("can_disable_mailings", "может отключать рассылки"),
         ]
 
 
