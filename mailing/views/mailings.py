@@ -94,7 +94,7 @@ class MailingRunView(LoginRequiredMixin, View):
     def post(self, request, pk):
         mailing = get_object_or_404(Mailing, pk=pk)
 
-        if mailing.owner != request.user and not request.user.is_staff:
+        if mailing.owner != request.user and not request.user.is_superuser:
             messages.error(request, "У вас нет прав на запуск этой рассылки.")
             return redirect("mailing:mailing_detail", pk=pk)
 
