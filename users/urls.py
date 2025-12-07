@@ -1,9 +1,11 @@
 from django.urls import path
 
-from users.views.user import CustomLoginView, CustomLogoutView, CustomRegistrationView, RegistrationDoneView, \
-    ConfirmEmailView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView
 from users.views.manager import ManagerDashboardView, ManagerClientsListView, ManagerUsersListView, \
     ManagerMailingsListView, ManagerUserDetailView, manager_toggle_block
+from users.views.password_reset import UserPasswordResetView, UserPasswordResetDoneView, UserPasswordResetConfirmView, \
+    UserPasswordResetCompleteView
+from users.views.user import CustomLoginView, CustomLogoutView, CustomRegistrationView, RegistrationDoneView, \
+    ConfirmEmailView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView
 
 app_name = "users"
 
@@ -22,5 +24,9 @@ urlpatterns = [
     path("manager/mailings/", ManagerMailingsListView.as_view(), name="manager_mailings_list"),
     path("manager/user/<int:pk>/", ManagerUserDetailView.as_view(), name="manager_user_detail"),
     path("manager/user/<int:pk>/toggle_block/", manager_toggle_block, name="manager_toggle_block"),
+    path("password_reset/", UserPasswordResetView.as_view(), name="password_reset"),
+    path("password_reset/done/", UserPasswordResetDoneView.as_view(), name="password_reset_done"),
+    path("password_reset/confirm/<uidb64>/<token>/", UserPasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path("password_reset/complete/", UserPasswordResetCompleteView.as_view(), name="password_reset_complete"),
 
 ]
