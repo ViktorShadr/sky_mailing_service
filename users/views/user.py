@@ -5,6 +5,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_bytes
@@ -47,15 +48,33 @@ class CustomRegistrationView(CreateView):
             reverse("users:confirm_email", kwargs={"uidb64": uidb64, "token": token})
         )
 
-        subject = "Подтверждение регистрации"
-        message = (
-            "Спасибо за регистрацию в SkyMail!\n\n"
-            f"Для завершения регистрации перейдите по ссылке:\n{confirm_url}\n\n"
-            "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
+        context = {
+            "user": user,
+            "confirm_url": confirm_url,
+            "site_name": "SkyMail",
+        }
+
+        subject = render_to_string(
+            "users/email/registration_confirm_subject.txt", context
+        ).strip()
+
+        message = render_to_string(
+            "users/email/registration_confirm_email.txt", context
+        )
+
+        html_message = render_to_string(
+            "users/email/registration_confirm_email.html", context
         )
 
         from_email = getattr(settings, "DEFAULT_FROM_EMAIL", os.getenv("FROM_EMAIL"))
-        send_mail(subject, message, from_email, [user.email])
+
+        send_mail(
+            subject,
+            message,
+            from_email,
+            [user.email],
+            html_message=html_message,
+        )
 
 
 class RegistrationDoneView(TemplateView):

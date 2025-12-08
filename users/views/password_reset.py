@@ -4,14 +4,14 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
-from users.forms import UserSetPasswordForm, UserPasswordResetForm
+from users.forms import UserSetPasswordForm
 
 
 class UserPasswordResetView(PasswordResetView):
     template_name = "registration/password_reset_form.html"
-    form_class = UserPasswordResetForm
+
     email_template_name = "registration/password_reset_email.txt"
     html_email_template_name = "registration/password_reset_email.html"
     subject_template_name = "registration/password_reset_subject.txt"

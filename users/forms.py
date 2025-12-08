@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, SetPasswordForm, PasswordResetForm
+from django.urls import reverse
 
 from users.models import User
 
@@ -109,24 +110,6 @@ class UserProfileForm(forms.ModelForm):
             self.instance.avatar = None
 
         return super().save(commit)
-
-
-class UserPasswordResetForm(PasswordResetForm):
-    """
-    Форма для ввода email на шаге 'Забыли пароль?'.
-    Используется в UserPasswordResetView.
-    """
-
-    email = forms.EmailField(
-        label="Email",
-        max_length=254,
-        widget=forms.EmailInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Введите email, указанный при регистрации",
-            }
-        ),
-    )
 
 
 class UserSetPasswordForm(SetPasswordForm):
