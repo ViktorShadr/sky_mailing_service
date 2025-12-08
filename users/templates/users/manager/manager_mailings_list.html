@@ -93,22 +93,12 @@
                     <td>{{ mailing.clients.count }}</td>
 
                     <td class="text-end">
-                        {% if perms.mailing.can_disable_mailings %}
-                        <div class="btn-group btn-group-sm">
-                            {# Отключить рассылку #}
-                            {% if mailing.status == "started" %}
-                            <form method="post" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="mailing_id" value="{{ mailing.pk }}">
-                                <input type="hidden" name="action" value="disable">
-                                <button type="submit" class="btn btn-outline-danger">
-                                    <i class="bi bi-stop-fill me-1"></i>Отключить
-                                </button>
-                            </form>
-                            {% endif %}
-                        </div>
-                        {% endif %}
+                        <a href="{% url 'users:manager_mailing_detail' mailing.pk %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-three-dots"></i> Подробнее
+                        </a>
                     </td>
+
                 </tr>
                 {% empty %}
                 <tr>

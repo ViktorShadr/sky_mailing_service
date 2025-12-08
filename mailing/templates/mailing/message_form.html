@@ -19,14 +19,31 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
+
         <form method="post">
             {% csrf_token %}
-            
+
             {{ form.as_p }}
 
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a href="{% url 'mailing:message_list' %}" class="btn btn-secondary">Отмена</a>
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i> Сохранить
+                </button>
+
+                {% if object %}
+                    <a href="{% url 'mailing:message_detail' object.pk %}"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i> Отмена
+                    </a>
+                {% else %}
+                    <a href="{% url 'mailing:message_list' %}"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i> Отмена
+                    </a>
+                {% endif %}
+            </div>
         </form>
+
     </div>
 </div>
 {% endblock %}

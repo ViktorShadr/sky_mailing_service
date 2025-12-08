@@ -26,7 +26,11 @@
             {{ form.as_p }}
 
             <button type="submit" class="btn btn-primary">Сохранить</button>
+            {% if object %}
+            <a href="{% url 'mailing:client_detail' client.pk %}" class="btn btn-secondary">Отмена</a>
+            {% else %}
             <a href="{% url 'mailing:client_list' %}" class="btn btn-secondary">Отмена</a>
+            {% endif %}
         </form>
     </div>
 </div>

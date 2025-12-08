@@ -18,7 +18,7 @@
         <button type="submit" class="btn btn-danger">
             Да, удалить
         </button>
-        <a href="{% url 'mailing:mailing_list' %}" class="btn btn-secondary">
+        <a href="{% url 'mailing:mailing_detail' mailing.pk %}" class="btn btn-secondary">
             Отмена
         </a>
     </form>

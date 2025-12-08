@@ -43,9 +43,16 @@
         <button type="submit" class="btn btn-primary">
             Сохранить
         </button>
+
+        {% if object  %}
+        <a href="{% url 'mailing:mailing_detail' mailing.pk %}" class="btn btn-secondary">
+            Отмена
+        </a>
+        {% else %}
         <a href="{% url 'mailing:mailing_list' %}" class="btn btn-secondary">
             Отмена
         </a>
+        {% endif %}
     </form>
 </div>
 {% endblock %}

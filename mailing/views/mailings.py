@@ -18,13 +18,41 @@ class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     context_object_name = "mailings"
     paginate_by = 6
 
+    def get_queryset(self):
+        """
+        Возвращаем рассылки текущего пользователя (или все для менеджера)
+        и обновляем статус КАЖДОГО объекта только в памяти (save=False),
+        чтобы не делать лишние UPDATE-запросы к БД при открытии списка.
+
+        Фактическое сохранение статуса в БД происходит:
+        - в детальном представлении (MailingDetailView),
+        - при запуске рассылки (run_mailing).
+        """
+        qs = super().get_queryset()
+
+        for mailing in qs:
+            mailing.update_status(save=False)
+
+        return qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = self.get_queryset()
+        qs = self.object_list
+        now = timezone.now()
 
         context["total_mailings"] = qs.count()
+        context["created_mailings"] = qs.filter(status="created").count()
         context["started_mailings"] = qs.filter(status="started").count()
         context["finished_mailings"] = qs.filter(status="finished").count()
+
+        # Активные по ТЗ: сейчас в интервале и статус "Запущена"
+        context["active_mailings"] = qs.filter(
+            status="started",
+            start_time__lte=now,
+            end_time__gte=now,
+        ).count()
+
+        context["now"] = now
         return context
 
 
@@ -50,7 +78,11 @@ class MailingUpdateView(LoginRequiredMixin, OwnerAccessMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
     template_name = "mailing/mailing_form.html"
-    success_url = reverse_lazy("mailing:mailing_list")
+
+    def get_success_url(self):
+        return reverse_lazy("mailing:mailing_detail", kwargs={"pk": self.object.pk})
+
+
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

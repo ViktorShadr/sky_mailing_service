@@ -31,18 +31,10 @@
                     <td>{{ client.name }}</td>
                     <td>{{ client.comment|default:"—" }}</td>
                     <td class="text-end">
-                        {% if client.owner == user %}
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'mailing:client_update' client.pk %}" class="btn btn-outline-primary"
-                               title="Редактировать">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="{% url 'mailing:client_delete' client.pk %}" class="btn btn-outline-danger"
-                               title="Удалить">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
-                        {% endif %}
+                        <a href="{% url 'mailing:client_detail' client.pk %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-three-dots"></i> Подробнее
+                        </a>
                     </td>
 
                 </tr>

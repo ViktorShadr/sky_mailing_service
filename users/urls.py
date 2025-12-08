@@ -6,7 +6,7 @@ from users.views.manager import (
     ManagerUsersListView,
     ManagerMailingsListView,
     ManagerUserDetailView,
-    manager_toggle_block,
+    manager_toggle_block, ManagerClientDetailView, ManagerMailingDetailView, ManagerMailingDisableView,
 )
 from users.views.password_reset import (
     UserPasswordResetView,
@@ -38,8 +38,11 @@ urlpatterns = [
     path("profile/delete/", ProfileDeleteView.as_view(), name="profile_delete"),
     path("manager/", ManagerDashboardView.as_view(), name="manager_dashboard"),
     path("manager/clients/", ManagerClientsListView.as_view(), name="manager_clients_list"),
+    path("manager/client/<int:pk>/", ManagerClientDetailView.as_view(), name="manager_client_detail"),
     path("manager/users/", ManagerUsersListView.as_view(), name="manager_users_list"),
     path("manager/mailings/", ManagerMailingsListView.as_view(), name="manager_mailings_list"),
+    path("manager/mailing/<int:pk>/", ManagerMailingDetailView.as_view(), name="manager_mailing_detail"),
+    path("manager/mailing/<int:pk>/disable/", ManagerMailingDisableView.as_view(), name="manager_mailing_disable"),
     path("manager/user/<int:pk>/", ManagerUserDetailView.as_view(), name="manager_user_detail"),
     path("manager/user/<int:pk>/toggle_block/", manager_toggle_block, name="manager_toggle_block"),
     path("password_reset/", UserPasswordResetView.as_view(), name="password_reset"),

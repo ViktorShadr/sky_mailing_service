@@ -1,8 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
 
 from mailing.models import Mailing, Client
@@ -42,6 +44,13 @@ class ManagerClientsListView(PermissionRequiredMixin, ManagerRequiredMixin, List
         return Client.objects.select_related("owner").all()
 
 
+class ManagerClientDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
+    model = Client
+    template_name = "users/manager/manager_client_detail.html"
+    context_object_name = "client"
+    permission_required = "mailing.can_view_all_clients"
+
+
 class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
     model = User
     template_name = "users/manager/manager_users_list.html"
@@ -58,6 +67,53 @@ class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListVi
                 mailings_count=Count("mailings", distinct=True),
             )
         )
+
+
+class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
+    """
+    Карточка одного пользователя под шаблон manager_user_detail.html
+    """
+
+    model = User
+    template_name = "users/manager/manager_user_detail.html"
+    context_object_name = "view_user"
+    permission_required = "users.can_view_all_users", "users.can_block_users"
+
+    def get_queryset(self):
+        return (
+            User.objects.filter(is_manager=False)
+            .exclude(is_staff=True, is_superuser=True)
+            .annotate(
+                clients_count=Count("clients", distinct=True),
+                mailings_count=Count("mailings", distinct=True),
+            )
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.object
+
+        context["last_clients"] = Client.objects.filter(owner=user).order_by("-id")[:5]
+        context["last_mailings"] = Mailing.objects.filter(owner=user).order_by("-id")[:5]
+
+        return context
+
+
+def is_manager(user: User) -> bool:
+    return user.is_authenticated and user.is_manager
+
+
+@permission_required("users.can_block_users", raise_exception=True)
+@user_passes_test(is_manager)
+@login_required
+def manager_toggle_block(request, pk):
+    user_obj = get_object_or_404(
+        User.objects.filter(is_manager=False).exclude(is_staff=True, is_superuser=True),
+        pk=pk,
+    )
+    user_obj.is_active = not user_obj.is_active
+    user_obj.save()
+    return redirect("users:manager_user_detail", pk=pk)
 
 
 class ManagerMailingsListView(ManagerRequiredMixin, ListView):
@@ -109,48 +165,21 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
         return redirect("users:manager_mailings_list")
 
 
-class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
-    """
-    Карточка одного пользователя под шаблон manager_user_detail.html
-    """
-
-    model = User
-    template_name = "users/manager/manager_user_detail.html"
-    context_object_name = "view_user"
-    permission_required = "users.can_view_all_users"
-
-    def get_queryset(self):
-        return (
-            User.objects.filter(is_manager=False)
-            .exclude(is_staff=True, is_superuser=True)
-            .annotate(
-                clients_count=Count("clients", distinct=True),
-                mailings_count=Count("mailings", distinct=True),
-            )
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.object
-
-        context["last_clients"] = Client.objects.filter(owner=user).order_by("-id")[:5]
-        context["last_mailings"] = Mailing.objects.filter(owner=user).order_by("-id")[:5]
-
-        return context
+class ManagerMailingDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
+    model = Mailing
+    template_name = "users/manager/manager_mailing_detail.html"
+    context_object_name = "mailing"
+    permission_required = "mailing.can_view_all_mailings", "mailing.can_disable_mailings"
 
 
-def is_manager(user: User) -> bool:
-    return user.is_authenticated and user.is_manager
+class ManagerMailingDisableView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = "mailing.can_disable_mailings"
 
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk)
 
-@permission_required("users.can_block_users", raise_exception=True)
-@user_passes_test(is_manager)
-@login_required
-def manager_toggle_block(request, pk):
-    user_obj = get_object_or_404(
-        User.objects.filter(is_manager=False).exclude(is_staff=True, is_superuser=True),
-        pk=pk,
-    )
-    user_obj.is_active = not user_obj.is_active
-    user_obj.save()
-    return redirect("users:manager_user_detail", pk=pk)
+        mailing.end_time = timezone.now()
+        mailing.update_status()  # статус станет "finished"
+        messages.success(request, "Рассылка была отключена менеджером.")
+
+        return redirect("users:manager_mailing_detail", pk=mailing.pk)
