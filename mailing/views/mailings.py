@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
@@ -93,10 +94,32 @@ class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
     template_name = "mailing/mailing_detail.html"
     context_object_name = "mailing"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object()
+        obj.update_status(queryset)
+        return obj
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         mailing = self.object
+        now = timezone.now()
 
-        logs = MailingLog.objects.filter(mailing=mailing).order_by("-attempt_time")
-        context["logs"] = logs
+        interval_invalid = mailing.start_time >= mailing.end_time
+        before_window = mailing.start_time > now
+        after_window = mailing.end_time < now
+
+        can_run = (
+            not interval_invalid
+            and not before_window
+            and not after_window
+            and mailing.status != "finished"
+        )
+
+        context["logs"] = MailingLog.objects.filter(mailing=mailing).order_by("-attempt_time")
+        context["interval_invalid"] = interval_invalid
+        context["before_window"] = before_window
+        context["after_window"] = after_window
+        context["can_run"] = can_run
+        context["now"] = now  # если захочешь где-то показать
+
         return context

@@ -8,7 +8,7 @@
 </div>
 
 {# Предупреждение, если даты некорректны #}
-{% if mailing.start_time >= mailing.end_time %}
+{% if interval_invalid %}
 <div class="alert alert-danger mb-4">
     Интервал рассылки задан некорректно:
     дата окончания должна быть <strong>позже</strong> даты начала.<br>
@@ -18,6 +18,7 @@
     Пожалуйста, отредактируйте рассылку перед запуском.
 </div>
 {% endif %}
+
 
 <div class="row g-4">
     <!-- Левая колонка: информация и логи -->
@@ -113,17 +114,40 @@
                           method="post">
                         {% csrf_token %}
                         <button type="submit"
-                                class="btn btn-success w-100"
-                                {% if mailing.status == "finished" or mailing.start_time >= mailing.end_time %}disabled{% endif %}>
-                        <i class="bi bi-play-fill me-1"></i> Запустить
+                                class="btn {% if can_run %}btn-success{% else %}btn-outline-secondary{% endif %} w-100"
+                                {% if not can_run %}disabled{% endif %}>
+                            <i class="bi bi-play-fill me-1"></i>
+                            Запустить
                         </button>
-                        {% if mailing.start_time >= mailing.end_time %}
+
+                        {# Пояснения, почему запуск невозможен #}
+                        {% if not can_run %}
+                        {% if interval_invalid %}
                         <p class="text-danger small mt-2 mb-0">
                             Интервал дат некорректен, запуск невозможен.
                             Отредактируйте даты начала и окончания.
                         </p>
+                        {% elif before_window %}
+                        <p class="text-muted small mt-2 mb-0">
+                            Время запуска ещё не наступило.<br>
+                            Запуск будет доступен с
+                            {{ mailing.start_time|date:"d.m.Y H:i" }}.
+                        </p>
+                        {% elif after_window %}
+                        <p class="text-muted small mt-2 mb-0">
+                            Окно рассылки уже завершилось
+                            (после {{ mailing.end_time|date:"d.m.Y H:i" }}).<br>
+                            Запуск больше недоступен.
+                        </p>
+                        {% elif mailing.status == "finished" %}
+                        <p class="text-muted small mt-2 mb-0">
+                            Рассылка помечена как завершённая.
+                            Повторный запуск не предусмотрен.
+                        </p>
+                        {% endif %}
                         {% endif %}
                     </form>
+
 
                     <a href="{% url 'mailing:mailing_delete' mailing.pk %}"
                        class="btn btn-outline-danger">

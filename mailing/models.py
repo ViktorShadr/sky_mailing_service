@@ -80,6 +80,11 @@ class Mailing(models.Model):
         """
         super().clean()
 
+        now = timezone.now()
+
+        if self.start_time and self.start_time < now:
+            raise ValidationError({"start_time": "Дата начала рассылки не может быть в прошлом."})
+
         if self.start_time and self.end_time:
             if self.start_time >= self.end_time:
                 raise ValidationError({"end_time": "Дата окончания рассылки должна быть позже даты начала."})
