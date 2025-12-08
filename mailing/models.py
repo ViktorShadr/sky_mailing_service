@@ -6,7 +6,7 @@ from users.models import User
 
 
 class Client(models.Model):
-    email = models.CharField(unique=True, max_length=255)
+    email = models.EmailField(unique=True, max_length=255)
     name = models.CharField(max_length=255)
     comment = models.TextField(max_length=255)
     owner = models.ForeignKey(
@@ -31,7 +31,7 @@ class Client(models.Model):
 
 class Message(models.Model):
     subject = models.CharField("Тема", max_length=255)
-    body = models.TextField("Тело письма", max_length=255)
+    body = models.TextField("Тело сообщения")
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -47,6 +47,9 @@ class Message(models.Model):
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+        permissions = [
+            ("can_view_all_messages", "может просматривать все сообщения"),
+        ]
 
 
 class Mailing(models.Model):

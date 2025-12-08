@@ -9,6 +9,7 @@ PERMISSIONS = [
     "can_view_all_mailings",
     "can_disable_mailings",
     "can_view_all_clients",
+    "can_view_all_messages",
 ]
 
 

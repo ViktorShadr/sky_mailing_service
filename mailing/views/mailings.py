@@ -128,7 +128,7 @@ class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object()
-        obj.update_status(queryset)
+        obj.update_status()
         return obj
 
     def get_context_data(self, **kwargs):

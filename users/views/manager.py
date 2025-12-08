@@ -116,7 +116,7 @@ def manager_toggle_block(request, pk):
     return redirect("users:manager_user_detail", pk=pk)
 
 
-class ManagerMailingsListView(ManagerRequiredMixin, ListView):
+class ManagerMailingsListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
     model = Mailing
     template_name = "users/manager/manager_mailings_list.html"
     context_object_name = "mailings"
@@ -124,7 +124,7 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
     permission_required = "mailing.can_view_all_mailings"
 
     def get_queryset(self):
-        return Mailing.objects.all().prefetch_related("clients", "message")
+        return Mailing.objects.all().prefetch_related("clients").select_related("message")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -135,34 +135,6 @@ class ManagerMailingsListView(ManagerRequiredMixin, ListView):
         context["finished_mailings"] = mailings_qs.filter(status="finished").count()
 
         return context
-
-    def post(self, request, *args, **kwargs):
-        mailing_id = request.POST.get("mailing_id")
-        action = request.POST.get("action")
-
-        if not mailing_id or not action:
-            messages.error(request, "Некорректный запрос.")
-            return redirect("users:manager_mailings_list")
-
-        mailing = get_object_or_404(Mailing, pk=mailing_id)
-
-        if action == "disable":
-
-            if not request.user.has_perm("mailing.can_disable_mailings"):
-                messages.error(request, "У вас нет прав на отключение рассылок.")
-                return redirect("users:manager_mailings_list")
-
-            if mailing.status != "started":
-                messages.info(request, "Эту рассылку нельзя отключить: она не активна.")
-                return redirect("users:manager_mailings_list")
-
-            mailing.status = "finished"
-            mailing.save()
-            messages.success(request, "Рассылка отключена менеджером.")
-            return redirect("users:manager_mailings_list")
-
-        messages.error(request, "Недопустимое действие.")
-        return redirect("users:manager_mailings_list")
 
 
 class ManagerMailingDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
@@ -179,7 +151,8 @@ class ManagerMailingDisableView(LoginRequiredMixin, PermissionRequiredMixin, Vie
         mailing = get_object_or_404(Mailing, pk=pk)
 
         mailing.end_time = timezone.now()
-        mailing.update_status()  # статус станет "finished"
+        mailing.save(update_fields=["end_time"])
+        mailing.update_status()
         messages.success(request, "Рассылка была отключена менеджером.")
 
         return redirect("users:manager_mailing_detail", pk=mailing.pk)

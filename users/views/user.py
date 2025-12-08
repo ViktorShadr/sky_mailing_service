@@ -12,7 +12,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
 
-from config import settings
+from django.conf import settings
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from users.models import User
 

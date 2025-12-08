@@ -9,7 +9,7 @@ class OwnerQuerysetMixin:
     """
 
     owner_field = "owner"
-    view_all_perm: str | None = None  # например: "mailing.can_view_all_mailings"
+    view_all_perm: str | None = None
 
     def get_queryset(self):
         qs = super().get_queryset()

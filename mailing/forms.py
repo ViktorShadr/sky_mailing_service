@@ -13,7 +13,7 @@ class ClientForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Введите email"}),
             "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Введите ФИО"}),
             "comment": forms.Textarea(
-                attrs={"class": "form-control", "placeholder": "Комментарий (опционально)", "rows": 3}
+                attrs={"class": "form-control", "placeholder": "Комментарий", "rows": 3}
             ),
         }
 
