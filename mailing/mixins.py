@@ -7,6 +7,7 @@ class OwnerQuerysetMixin:
     - если у пользователя есть view_all_perm -> полный queryset
     - иначе фильтрация по owner_field (по умолчанию 'owner').
     """
+
     owner_field = "owner"
     view_all_perm: str | None = None  # например: "mailing.can_view_all_mailings"
 
@@ -25,6 +26,7 @@ class OwnerAccessMixin:
     Для Update/Delete/View, где объект должен принадлежать текущему пользователю.
     Суперпользователь имеет полный доступ.
     """
+
     owner_field = "owner"
 
     def dispatch(self, request, *args, **kwargs):

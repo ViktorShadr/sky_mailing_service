@@ -17,7 +17,6 @@ class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     context_object_name = "mailings"
     paginate_by = 6
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         qs = self.get_queryset()
@@ -93,7 +92,6 @@ class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
     model = Mailing
     template_name = "mailing/mailing_detail.html"
     context_object_name = "mailing"
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -2,8 +2,14 @@ from django.urls import path
 
 from mailing.views.clients import ClientCreateView, ClientDeleteView, ClientListView, ClientUpdateView
 from mailing.views.mailing_logs import MailingLogListView
-from mailing.views.mailings import MailingListView, MailingUpdateView, MailingDeleteView, MailingCreateView, \
-    MailingRunView, MailingDetailView
+from mailing.views.mailings import (
+    MailingListView,
+    MailingUpdateView,
+    MailingDeleteView,
+    MailingCreateView,
+    MailingRunView,
+    MailingDetailView,
+)
 from mailing.views.main import MailingTemplateView
 from mailing.views.messages import MessageCreateView, MessageDeleteView, MessageListView, MessageUpdateView
 

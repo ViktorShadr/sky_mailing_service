@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, SetPasswordForm, PasswordResetForm
 
 from users.models import User
 
@@ -109,3 +109,42 @@ class UserProfileForm(forms.ModelForm):
             self.instance.avatar = None
 
         return super().save(commit)
+
+
+class UserPasswordResetForm(PasswordResetForm):
+    """
+    Форма для ввода email на шаге 'Забыли пароль?'.
+    Используется в UserPasswordResetView.
+    """
+
+    email = forms.EmailField(
+        label="Email",
+        max_length=254,
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Введите email, указанный при регистрации",
+            }
+        ),
+    )
+
+
+class UserSetPasswordForm(SetPasswordForm):
+    """
+    Кастомная форма для установки нового пароля в стиле проекта.
+    Используется в UserPasswordResetConfirmView.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Общие атрибуты для всех полей
+        for name, field in self.fields.items():
+            field.widget.attrs.setdefault("class", "form-control")
+
+        # Кастомные лейблы и плейсхолдеры
+        self.fields["new_password1"].label = "Новый пароль"
+        self.fields["new_password1"].widget.attrs.setdefault("placeholder", "Введите новый пароль")
+
+        self.fields["new_password2"].label = "Подтверждение пароля"
+        self.fields["new_password2"].widget.attrs.setdefault("placeholder", "Повторите новый пароль")

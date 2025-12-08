@@ -6,10 +6,8 @@ MANAGER_GROUP_NAME = "Managers"
 PERMISSIONS = [
     "can_view_all_users",
     "can_block_users",
-
     "can_view_all_mailings",
     "can_disable_mailings",
-
     "can_view_all_clients",
 ]
 
@@ -37,8 +35,4 @@ class Command(BaseCommand):
 
         group.save()
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Назначено прав: {added}. Группа '{MANAGER_GROUP_NAME}' готова."
-            )
-        )
+        self.stdout.write(self.style.SUCCESS(f"Назначено прав: {added}. Группа '{MANAGER_GROUP_NAME}' готова."))

@@ -32,7 +32,5 @@ class Command(BaseCommand):
         user.groups.add(group)
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Менеджер {user.email} успешно создан и добавлен в группу '{MANAGER_GROUP_NAME}'."
-            )
+            self.style.SUCCESS(f"Менеджер {user.email} успешно создан и добавлен в группу '{MANAGER_GROUP_NAME}'.")
         )

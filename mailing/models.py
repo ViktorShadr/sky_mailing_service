@@ -10,7 +10,12 @@ class Client(models.Model):
     name = models.CharField(max_length=255)
     comment = models.TextField(max_length=255)
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=False, null=False, related_name="clients", verbose_name="Владелец клиента"
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name="clients",
+        verbose_name="Владелец клиента",
     )
 
     def __str__(self):
@@ -28,8 +33,12 @@ class Message(models.Model):
     subject = models.CharField("Тема", max_length=255)
     body = models.TextField("Тело письма", max_length=255)
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=False, null=False, related_name="messages",
-        verbose_name="Владелец сообщения"
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name="messages",
+        verbose_name="Владелец сообщения",
     )
 
     def __str__(self):
@@ -44,8 +53,12 @@ class Mailing(models.Model):
     start_time = models.DateTimeField("Дата и время начала отправки")
     end_time = models.DateTimeField("Дата и время окончания отправки")
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=False, null=False, related_name="mailings",
-        verbose_name="Владелец рассылки"
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name="mailings",
+        verbose_name="Владелец рассылки",
     )
 
     status = models.CharField(
@@ -69,11 +82,7 @@ class Mailing(models.Model):
 
         if self.start_time and self.end_time:
             if self.start_time >= self.end_time:
-                raise ValidationError(
-                    {
-                        "end_time": "Дата окончания рассылки должна быть позже даты начала."
-                    }
-                )
+                raise ValidationError({"end_time": "Дата окончания рассылки должна быть позже даты начала."})
 
     def update_status(self, save=True):
         """Пересчитывает статус на основе текущего времени и интервала."""

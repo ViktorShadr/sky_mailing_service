@@ -53,12 +53,8 @@ class MailingForm(forms.ModelForm):
         widgets = {
             "message": forms.Select(attrs={"class": "form-control"}),
             "clients": forms.SelectMultiple(attrs={"class": "form-control"}),
-            "start_time": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"}
-            ),
-            "end_time": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"}
-            ),
+            "start_time": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "end_time": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
             "status": forms.Select(attrs={"class": "form-control"}),
         }
 

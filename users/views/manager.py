@@ -42,7 +42,6 @@ class ManagerClientsListView(PermissionRequiredMixin, ManagerRequiredMixin, List
         return Client.objects.select_related("owner").all()
 
 
-
 class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
     model = User
     template_name = "users/manager/manager_users_list.html"
@@ -59,7 +58,6 @@ class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListVi
                 mailings_count=Count("mailings", distinct=True),
             )
         )
-
 
 
 class ManagerMailingsListView(ManagerRequiredMixin, ListView):
@@ -115,6 +113,7 @@ class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, Detai
     """
     Карточка одного пользователя под шаблон manager_user_detail.html
     """
+
     model = User
     template_name = "users/manager/manager_user_detail.html"
     context_object_name = "view_user"
@@ -130,23 +129,19 @@ class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, Detai
             )
         )
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.object
 
-        context["last_clients"] = (
-            Client.objects.filter(owner=user).order_by("-id")[:5]
-        )
-        context["last_mailings"] = (
-            Mailing.objects.filter(owner=user).order_by("-id")[:5]
-        )
+        context["last_clients"] = Client.objects.filter(owner=user).order_by("-id")[:5]
+        context["last_mailings"] = Mailing.objects.filter(owner=user).order_by("-id")[:5]
 
         return context
 
 
 def is_manager(user: User) -> bool:
     return user.is_authenticated and user.is_manager
+
 
 @permission_required("users.can_block_users", raise_exception=True)
 @user_passes_test(is_manager)

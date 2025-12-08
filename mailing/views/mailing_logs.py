@@ -17,11 +17,7 @@ class MailingLogListView(LoginRequiredMixin, ListView):
         - обычный пользователь видит только свои рассылки;
         - менеджер с правом can_view_all_mailings видит всё.
         """
-        qs = (
-            super()
-            .get_queryset()
-            .select_related("mailing", "mailing__message", "mailing__owner", "client")
-        )
+        qs = super().get_queryset().select_related("mailing", "mailing__message", "mailing__owner", "client")
 
         user = self.request.user
 
@@ -59,8 +55,7 @@ class MailingLogListView(LoginRequiredMixin, ListView):
         # ===== Статистика по каждой рассылке =====
         # Берём только те рассылки, по которым есть логи в qs
         mailings_stats = (
-            Mailing.objects
-            .filter(mailinglog__in=qs)
+            Mailing.objects.filter(mailinglog__in=qs)
             .distinct()
             .annotate(
                 total_attempts=Count("mailinglog"),
@@ -80,9 +75,7 @@ class MailingLogListView(LoginRequiredMixin, ListView):
         # Добавим каждому объекту процент успешности
         for mailing in mailings_stats:
             if mailing.total_attempts:
-                mailing.success_rate = round(
-                    mailing.success_count / mailing.total_attempts * 100
-                )
+                mailing.success_rate = round(mailing.success_count / mailing.total_attempts * 100)
             else:
                 mailing.success_rate = 0
 

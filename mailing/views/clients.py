@@ -14,7 +14,6 @@ class ClientListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     paginate_by = 6
 
 
-
 class ClientCreateView(LoginRequiredMixin, CreateView):
     model = Client
     form_class = ClientForm
