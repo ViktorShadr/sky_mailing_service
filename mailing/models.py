@@ -1,8 +1,13 @@
+import logging
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
 from users.models import User
+
+
+logger = logging.getLogger("mailing")
 
 
 class Client(models.Model):
@@ -104,9 +109,16 @@ class Mailing(models.Model):
             new_status = "finished"
 
         if new_status != self.status:
+            old_status = self.status
             self.status = new_status
             if save:
                 self.save(update_fields=["status"])
+            logger.info(
+                "Обновление статуса рассылки id=%s: %s → %s",
+                self.id,
+                old_status,
+                self.status,
+            )
 
     def __str__(self):
         return f"{self.message.subject} ({self.get_status_display()})"

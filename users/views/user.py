@@ -1,5 +1,7 @@
+import logging
 import os
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import LoginView, LogoutView
@@ -12,18 +14,42 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
 
-from django.conf import settings
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from users.models import User
+
+logger = logging.getLogger("users")
 
 
 class CustomLoginView(LoginView):
     template_name = "users/login.html"
     form_class = UserLoginForm
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = self.request.user
+        logger.info(
+            "Пользователь успешно авторизовался: id=%s, email=%s",
+            user.id,
+            getattr(user, "email", ""),
+        )
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        email = form.data.get("email") or form.data.get("username")
+        logger.warning("Неуспешная попытка входа: email=%s", email)
+        return response
+
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy("mailing:index")
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        response = super().dispatch(request, *args, **kwargs)
+        if user.is_authenticated:
+            logger.info("Пользователь id=%s успешно вышел из системы", user.id)
+        return response
 
 
 class CustomRegistrationView(CreateView):
@@ -34,7 +60,17 @@ class CustomRegistrationView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         user = self.object
-        self.send_confirmation_email(user)
+        try:
+            self.send_confirmation_email(user)
+        except Exception as exc:
+            logger.error(
+                "Ошибка при отправке письма подтверждения регистрации: user_id=%s, error=%s",
+                user.id,
+                str(exc),
+                exc_info=True,
+            )
+        else:
+            logger.info("Пользователь id=%s успешно зарегистрировался", user.id)
         return response
 
     def send_confirmation_email(self, user):

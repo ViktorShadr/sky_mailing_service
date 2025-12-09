@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -5,7 +7,11 @@ from django.utils import timezone
 from .models import Mailing, MailingLog
 
 
+logger = logging.getLogger("mailing")
+
+
 def run_mailing(mailing: Mailing) -> dict:
+    logger.info("Запуск рассылки id=%s", mailing.id)
     now = timezone.now()
 
     if mailing.start_time >= mailing.end_time:
@@ -40,6 +46,7 @@ def run_mailing(mailing: Mailing) -> dict:
 
     clients = mailing.clients.all()
     total = clients.count()
+    logger.info("Рассылка id=%s: найдено %s получателей", mailing.id, total)
     success_count = 0
     failed_count = 0
 
@@ -58,6 +65,13 @@ def run_mailing(mailing: Mailing) -> dict:
             )
         except Exception as exc:
             failed_count += 1
+            logger.error(
+                "Ошибка при отправке письма: mailing_id=%s, client_id=%s, error=%s",
+                mailing.id,
+                client.id,
+                str(exc),
+                exc_info=True,
+            )
             MailingLog.objects.create(
                 mailing=mailing,
                 client=client,
@@ -67,6 +81,11 @@ def run_mailing(mailing: Mailing) -> dict:
         else:
             if sent == 1:
                 success_count += 1
+                logger.info(
+                    "Письмо успешно отправлено: mailing_id=%s, client_id=%s",
+                    mailing.id,
+                    client.id,
+                )
                 MailingLog.objects.create(
                     mailing=mailing,
                     client=client,

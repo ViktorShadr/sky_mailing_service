@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -12,6 +14,9 @@ from mailing.forms import MailingForm
 from mailing.models import Mailing, MailingLog
 from mailing.services import run_mailing
 from mailing.mixins import OwnerQuerysetMixin, OwnerAccessMixin
+
+
+logger = logging.getLogger("mailing")
 
 
 class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
@@ -123,12 +128,28 @@ class MailingRunView(LoginRequiredMixin, View):
         mailing = get_object_or_404(Mailing, pk=pk)
 
         if mailing.owner != request.user and not request.user.is_superuser:
+            logger.warning(
+                "Пользователь id=%s не имеет прав на запуск рассылки id=%s",
+                request.user.id,
+                mailing.id,
+            )
             messages.error(request, "У вас нет прав на запуск этой рассылки.")
             return redirect("mailing:mailing_detail", pk=pk)
 
+        logger.info(
+            "Ручной запуск рассылки id=%s пользователем id=%s",
+            mailing.id,
+            request.user.id,
+        )
         result = run_mailing(mailing)
 
         if not result["ok"]:
+            logger.warning(
+                "Ручной запуск рассылки невозможен: mailing_id=%s, user_id=%s, reason=%s",
+                mailing.id,
+                request.user.id,
+                result.get("error", ""),
+            )
             messages.error(request, result["error"])
         else:
             messages.success(

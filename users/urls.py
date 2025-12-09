@@ -16,13 +16,12 @@ from users.views.password_reset import (
 )
 from users.views.user import (
     CustomLoginView,
-    CustomLogoutView,
     CustomRegistrationView,
     RegistrationDoneView,
     ConfirmEmailView,
     ProfileDetailView,
     ProfileUpdateView,
-    ProfileDeleteView,
+    ProfileDeleteView, CustomLogoutView,
 )
 
 app_name = "users"
