@@ -1,102 +1,19 @@
 {% extends "mailing/base.html" %}
 
-{% block title %}Рассылка — {{ mailing.message.subject }}{% endblock %}
+{% block title %}Рассылка — {{ mailing.message.subject|default:"(без темы)" }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">Рассылка</h1>
 </div>
 
-{# Предупреждение, если даты некорректны #}
-{% if interval_invalid %}
-<div class="alert alert-danger mb-4">
-    Интервал рассылки задан некорректно:
-    дата окончания должна быть <strong>позже</strong> даты начала.<br>
-    Текущие значения:<br>
-    Начало: {{ mailing.start_time|date:"d.m.Y H:i" }}<br>
-    Окончание: {{ mailing.end_time|date:"d.m.Y H:i" }}<br>
-    Пожалуйста, отредактируйте рассылку перед запуском.
-</div>
-{% endif %}
-
-
 <div class="row g-4">
-    <!-- Левая колонка: информация и логи -->
+    <!-- Левая колонка: общая информация и логи -->
     <div class="col-md-8">
-        <!-- Карточка с основными параметрами -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Параметры рассылки</h5>
-
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">Сообщение</dt>
-                    <dd class="col-sm-8">
-                        <strong>{{ mailing.message.subject|default:"(без темы)" }}</strong><br>
-                        <small class="text-muted">{{ mailing.message.body }}</small>
-                    </dd>
-
-                    <dt class="col-sm-4">Статус</dt>
-                    <dd class="col-sm-8">
-                        {% if mailing.status == "started" %}
-                        <span class="badge bg-success">{{ mailing.get_status_display }}</span>
-                        {% elif mailing.status == "finished" %}
-                        <span class="badge bg-secondary">{{ mailing.get_status_display }}</span>
-                        {% elif mailing.status == "created" %}
-                        <span class="badge bg-light text-dark">{{ mailing.get_status_display }}</span>
-                        {% else %}
-                        <span class="badge bg-light text-dark">Неизвестно</span>
-                        {% endif %}
-                    </dd>
-
-                    <dt class="col-sm-4">Дата начала</dt>
-                    <dd class="col-sm-8">{{ mailing.start_time|date:"d.m.Y H:i" }}</dd>
-
-                    <dt class="col-sm-4">Дата окончания</dt>
-                    <dd class="col-sm-8">{{ mailing.end_time|date:"d.m.Y H:i" }}</dd>
-
-                    <dt class="col-sm-4">Получателей</dt>
-                    <dd class="col-sm-8">{{ mailing.clients.count }}</dd>
-                </dl>
-            </div>
-        </div>
-
-        {# Логи попыток отправки, если есть #}
-        {% if logs %}
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Последние попытки отправки</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead>
-                        <tr>
-                            <th>Время</th>
-                            <th>Статус</th>
-                            <th>Ответ сервера</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for log in logs %}
-                        <tr>
-                            <td>{{ log.attempt_time|date:"d.m.Y H:i:s" }}</td>
-                            <td>
-                                {% if log.status == "success" %}
-                                <span class="badge bg-success">{{ log.get_status_display }}</span>
-                                {% else %}
-                                <span class="badge bg-danger">{{ log.get_status_display }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ log.server_response }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        {% include "mailing/includes/_mailing_detail_panel.html" with mailing=mailing logs=logs stats=stats interval_invalid=interval_invalid %}
     </div>
 
-    <!-- Правая колонка: действия -->
+    <!-- Правая колонка: действия пользователя -->
     <div class="col-md-4">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
@@ -120,34 +37,32 @@
                             Запустить
                         </button>
 
-                        {# Пояснения, почему запуск невозможен #}
                         {% if not can_run %}
-                        {% if interval_invalid %}
-                        <p class="text-danger small mt-2 mb-0">
-                            Интервал дат некорректен, запуск невозможен.
-                            Отредактируйте даты начала и окончания.
-                        </p>
-                        {% elif before_window %}
-                        <p class="text-muted small mt-2 mb-0">
-                            Время запуска ещё не наступило.<br>
-                            Запуск будет доступен с
-                            {{ mailing.start_time|date:"d.m.Y H:i" }}.
-                        </p>
-                        {% elif after_window %}
-                        <p class="text-muted small mt-2 mb-0">
-                            Окно рассылки уже завершилось
-                            (после {{ mailing.end_time|date:"d.m.Y H:i" }}).<br>
-                            Запуск больше недоступен.
-                        </p>
-                        {% elif mailing.status == "finished" %}
-                        <p class="text-muted small mt-2 mb-0">
-                            Рассылка помечена как завершённая.
-                            Повторный запуск не предусмотрен.
-                        </p>
-                        {% endif %}
+                            {% if interval_invalid %}
+                            <p class="text-danger small mt-2 mb-0">
+                                Интервал дат некорректен, запуск невозможен.
+                                Отредактируйте даты начала и окончания.
+                            </p>
+                            {% elif before_window %}
+                            <p class="text-muted small mt-2 mb-0">
+                                Время запуска ещё не наступило.<br>
+                                Запуск будет доступен с
+                                {{ mailing.start_time|date:"d.m.Y H:i" }}.
+                            </p>
+                            {% elif after_window %}
+                            <p class="text-muted small mt-2 mb-0">
+                                Окно рассылки уже завершилось
+                                (после {{ mailing.end_time|date:"d.m.Y H:i" }}).<br>
+                                Запуск больше недоступен.
+                            </p>
+                            {% elif mailing.status == "finished" %}
+                            <p class="text-muted small mt-2 mb-0">
+                                Рассылка помечена как завершённая.
+                                Повторный запуск не предусмотрен.
+                            </p>
+                            {% endif %}
                         {% endif %}
                     </form>
-
 
                     <a href="{% url 'mailing:mailing_delete' mailing.pk %}"
                        class="btn btn-outline-danger">
@@ -156,7 +71,7 @@
                     {% endif %}
 
                     <a href="{% url 'mailing:mailing_list' %}" class="btn btn-outline-secondary">
-                        Вернуться назад
+                        Вернуться к списку рассылок
                     </a>
                 </div>
             </div>

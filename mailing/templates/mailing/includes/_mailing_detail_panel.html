@@ -1,0 +1,113 @@
+<!--mailing/_mailing_detail_panel.html-->
+
+{# Предупреждение, если даты некорректны (для юзера/менеджера, если передали interval_invalid) #}
+{% if interval_invalid %}
+<div class="alert alert-danger mb-4">
+    Интервал рассылки задан некорректно:
+    дата окончания должна быть <strong>позже</strong> даты начала.<br>
+    Текущие значения:<br>
+    Начало: {{ mailing.start_time|date:"d.m.Y H:i" }}<br>
+    Окончание: {{ mailing.end_time|date:"d.m.Y H:i" }}<br>
+    Пожалуйста, отредактируйте рассылку перед запуском.
+</div>
+{% endif %}
+
+{# Основная информация о рассылке #}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Информация о рассылке</h5>
+
+        <dl class="row mb-0">
+            <dt class="col-sm-3 col-md-4">Сообщение</dt>
+            <dd class="col-sm-9 col-md-8">
+                <strong>{{ mailing.message.subject|default:"(без темы)" }}</strong><br>
+                <small class="text-muted">{{ mailing.message.body }}</small>
+            </dd>
+
+            <dt class="col-sm-3 col-md-4">Статус</dt>
+            <dd class="col-sm-9 col-md-8">
+                {% if mailing.status == "started" %}
+                <span class="badge bg-success">{{ mailing.get_status_display }}</span>
+                {% elif mailing.status == "finished" %}
+                <span class="badge bg-secondary">{{ mailing.get_status_display }}</span>
+                {% elif mailing.status == "created" %}
+                <span class="badge bg-light text-dark">{{ mailing.get_status_display }}</span>
+                {% else %}
+                <span class="badge bg-light text-dark">Неизвестно</span>
+                {% endif %}
+            </dd>
+
+            <dt class="col-sm-3 col-md-4">Дата начала</dt>
+            <dd class="col-sm-9 col-md-8">
+                {{ mailing.start_time|date:"d.m.Y H:i" }}
+            </dd>
+
+            <dt class="col-sm-3 col-md-4">Дата окончания</dt>
+            <dd class="col-sm-9 col-md-8">
+                {{ mailing.end_time|date:"d.m.Y H:i" }}
+            </dd>
+
+            <dt class="col-sm-3 col-md-4">Получателей</dt>
+            <dd class="col-sm-9 col-md-8">
+                {{ mailing.clients.count }}
+            </dd>
+        </dl>
+    </div>
+</div>
+
+{# Краткая статистика по попыткам, если передана #}
+{% if stats and stats.total %}
+<p class="mb-3 small text-muted">
+    Всего попыток: <strong>{{ stats.total }}</strong>,
+    успешно: <strong class="text-success">{{ stats.success }}</strong>,
+    с ошибкой: <strong class="text-danger">{{ stats.failed }}</strong>.
+</p>
+{% endif %}
+
+{# Логи попыток отправки #}
+{% if logs %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Попытки рассылки</h5>
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Время</th>
+                    <th>Получатель</th>
+                    <th>Статус</th>
+                    <th>Ответ сервера</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.attempt_time|date:"d.m.Y H:i:s" }}</td>
+                    <td>
+                        {% if log.client %}
+                        {{ log.client.email }}
+                        {% if log.client.full_name %}
+                        <small class="text-muted">({{ log.client.full_name }})</small>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.status == "success" %}
+                        <span class="badge bg-success">{{ log.get_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-danger">{{ log.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.server_response }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+{% endif %}

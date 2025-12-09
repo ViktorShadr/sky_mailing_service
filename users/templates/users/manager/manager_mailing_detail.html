@@ -1,7 +1,7 @@
 {% extends "mailing/base.html" %}
 {% load static %}
 
-{% block title %}Рассылка — {{ mailing.message.subject }}{% endblock %}
+{% block title %}Рассылка — {{ mailing.message.subject|default:"(без темы)" }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -10,112 +10,35 @@
 
 <div class="row g-4">
 
-    <!-- Левая колонка: информация -->
+    <!-- Левая колонка: общая информация и логи -->
     <div class="col-md-8">
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
-
-                <h5 class="card-title mb-3">Информация о рассылке</h5>
-
-                <dl class="row mb-0">
-
-                    <dt class="col-sm-3">Сообщение</dt>
-                    <dd class="col-sm-9">
-                        <strong>{{ mailing.message.subject }}</strong><br>
-                        <small class="text-muted">{{ mailing.message.body }}</small>
-                    </dd>
-
-                    <dt class="col-sm-3">Статус</dt>
-                    <dd class="col-sm-9">
-                        {% if mailing.status == "started" %}
-                        <span class="badge bg-success">{{ mailing.get_status_display }}</span>
-                        {% elif mailing.status == "finished" %}
-                        <span class="badge bg-secondary">{{ mailing.get_status_display }}</span>
-                        {% else %}
-                        <span class="badge bg-light text-dark">{{ mailing.get_status_display }}</span>
-                        {% endif %}
-                    </dd>
-
-                    <dt class="col-sm-3">Дата начала</dt>
-                    <dd class="col-sm-9">
-                        {{ mailing.start_time|date:"d.m.Y H:i" }}
-                    </dd>
-
-                    <dt class="col-sm-3">Дата окончания</dt>
-                    <dd class="col-sm-9">
-                        {{ mailing.end_time|date:"d.m.Y H:i" }}
-                    </dd>
-
-                    <dt class="col-sm-3">Получателей</dt>
-                    <dd class="col-sm-9">{{ mailing.clients.count }}</dd>
-
-                </dl>
-
-            </div>
-        </div>
-
-        <!-- Логи -->
-        {% if logs %}
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-
-                <h5 class="card-title mb-3">Попытки рассылки</h5>
-
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead>
-                        <tr>
-                            <th>Время</th>
-                            <th>Статус</th>
-                            <th>Ответ сервера</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for log in logs %}
-                        <tr>
-                            <td>{{ log.attempt_time|date:"d.m.Y H:i:s" }}</td>
-                            <td>
-                                {% if log.status == "success" %}
-                                <span class="badge bg-success">Успешно</span>
-                                {% else %}
-                                <span class="badge bg-danger">Ошибка</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ log.server_response }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-        </div>
-        {% endif %}
+        {# interval_invalid можешь тоже передать из менеджерской вьюхи, если нужно предупреждение #}
+        {% include "mailing/includes/_mailing_detail_panel.html" with mailing=mailing logs=logs stats=stats %}
     </div>
 
-    <!-- Правая колонка: действия -->
+    <!-- Правая колонка: действия менеджера -->
     <div class="col-md-4">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
 
-                <h5 class="card-title mb-3">Действия</h5>
+                <h5 class="card-title mb-3">Действия менеджера</h5>
 
                 <div class="d-grid gap-2">
 
                     {% if perms.mailing.can_disable_mailings %}
-                    {% if mailing.status == "started" %}
-                    <form method="post" action="{% url 'users:manager_mailing_disable' mailing.pk %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger w-100">
-                            <i class="bi bi-stop-fill me-1"></i> Отключить рассылку
-                        </button>
-                    </form>
-                    {% else %}
-                    <p class="text-muted small mb-2">
-                        Отключение доступно только для активных рассылок
-                        (статус "Запущена").
-                    </p>
-                    {% endif %}
+                        {% if mailing.status == "started" %}
+                        <form method="post" action="{% url 'users:manager_mailing_disable' mailing.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-stop-fill me-1"></i> Отключить рассылку
+                            </button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted small mb-2">
+                            Отключение доступно только для активных рассылок
+                            (статус «Запущена»).
+                        </p>
+                        {% endif %}
                     {% endif %}
 
                     <a href="{% url 'users:manager_mailings_list' %}"

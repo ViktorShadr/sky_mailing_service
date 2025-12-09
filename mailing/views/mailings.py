@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -105,8 +105,6 @@ class MailingUpdateView(LoginRequiredMixin, OwnerAccessMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy("mailing:mailing_detail", kwargs={"pk": self.object.pk})
 
-
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
@@ -170,11 +168,25 @@ class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
             and mailing.status != "finished"
         )
 
-        context["logs"] = MailingLog.objects.filter(mailing=mailing).order_by("-attempt_time")
+        logs_qs = (
+            MailingLog.objects
+            .filter(mailing=mailing)
+            .select_related("client")
+            .order_by("-attempt_time")
+        )
+
+        stats = logs_qs.aggregate(
+            total=Count("id"),
+            success=Count("id", filter=Q(status="success")),
+            failed=Count("id", filter=Q(status="failed")),
+        )
+
+        context["logs"] = logs_qs
+        context["stats"] = stats
         context["interval_invalid"] = interval_invalid
         context["before_window"] = before_window
         context["after_window"] = after_window
         context["can_run"] = can_run
-        context["now"] = now  # если захочешь где-то показать
+        context["now"] = now
 
         return context

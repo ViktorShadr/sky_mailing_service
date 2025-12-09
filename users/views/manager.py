@@ -1,13 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
 
-from mailing.models import Mailing, Client
+from mailing.models import Mailing, Client, MailingLog
 from users.mixins import ManagerRequiredMixin
 from users.models import User
 
@@ -141,7 +141,45 @@ class ManagerMailingDetailView(PermissionRequiredMixin, ManagerRequiredMixin, De
     model = Mailing
     template_name = "users/manager/manager_mailing_detail.html"
     context_object_name = "mailing"
-    permission_required = "mailing.can_view_all_mailings", "mailing.can_disable_mailings"
+    permission_required = ("mailing.can_view_all_mailings", "mailing.can_disable_mailings")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        # как и у обычного пользователя — динамически обновляем статус
+        obj.update_status()
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mailing = self.object
+        now = timezone.now()
+
+        # флаги интервала — если захочешь что-то подсвечивать менеджеру
+        interval_invalid = mailing.start_time >= mailing.end_time
+        before_window = mailing.start_time > now
+        after_window = mailing.end_time < now
+
+        logs_qs = (
+            MailingLog.objects
+            .filter(mailing=mailing)
+            .select_related("client")
+            .order_by("-attempt_time")
+        )
+
+        stats = logs_qs.aggregate(
+            total=Count("id"),
+            success=Count("id", filter=Q(status="success")),
+            failed=Count("id", filter=Q(status="failed")),
+        )
+
+        context["logs"] = logs_qs
+        context["stats"] = stats
+        context["interval_invalid"] = interval_invalid
+        context["before_window"] = before_window
+        context["after_window"] = after_window
+        context["now"] = now
+
+        return context
 
 
 class ManagerMailingDisableView(LoginRequiredMixin, PermissionRequiredMixin, View):
