@@ -1,0 +1,122 @@
+[
+  {
+    "model": "mailing.client",
+    "pk": 1,
+    "fields": {
+      "email": "ivanov@example.com",
+      "name": "Иванов Иван",
+      "comment": "Постоянный клиент",
+      "owner": 1
+    }
+  },
+  {
+    "model": "mailing.client",
+    "pk": 2,
+    "fields": {
+      "email": "petrova@example.com",
+      "name": "Петрова Мария",
+      "comment": "Подписчик акций",
+      "owner": 1
+    }
+  },
+  {
+    "model": "mailing.client",
+    "pk": 3,
+    "fields": {
+      "email": "sidorov@example.com",
+      "name": "Сидоров Алексей",
+      "comment": "Редко открывает письма",
+      "owner": 1
+    }
+  },
+
+  {
+    "model": "mailing.message",
+    "pk": 1,
+    "fields": {
+      "subject": "Добро пожаловать в SkyMail",
+      "body": "Спасибо за подписку! Мы рады видеть вас среди наших клиентов.",
+      "owner": 1
+    }
+  },
+  {
+    "model": "mailing.message",
+    "pk": 2,
+    "fields": {
+      "subject": "Специальное предложение",
+      "body": "Только сегодня: скидка 20% на все услуги.",
+      "owner": 1
+    }
+  },
+
+  {
+    "model": "mailing.mailing",
+    "pk": 1,
+    "fields": {
+      "start_time": "2030-01-01T10:00:00Z",
+      "end_time": "2030-01-01T12:00:00Z",
+      "owner": 1,
+      "status": "created",
+      "message": 1,
+      "clients": [1, 2]
+    }
+  },
+  {
+    "model": "mailing.mailing",
+    "pk": 2,
+    "fields": {
+      "start_time": "2025-01-01T08:00:00Z",
+      "end_time": "2035-01-01T20:00:00Z",
+      "owner": 1,
+      "status": "started",
+      "message": 2,
+      "clients": [1, 2, 3]
+    }
+  },
+  {
+    "model": "mailing.mailing",
+    "pk": 3,
+    "fields": {
+      "start_time": "2020-01-01T08:00:00Z",
+      "end_time": "2020-01-01T20:00:00Z",
+      "owner": 1,
+      "status": "finished",
+      "message": 1,
+      "clients": [3]
+    }
+  },
+
+  {
+    "model": "mailing.mailinglog",
+    "pk": 1,
+    "fields": {
+      "attempt_time": "2025-01-02T10:00:00Z",
+      "status": "success",
+      "server_response": "250 OK: queued as 12345",
+      "mailing": 2,
+      "client": 1
+    }
+  },
+  {
+    "model": "mailing.mailinglog",
+    "pk": 2,
+    "fields": {
+      "attempt_time": "2025-01-02T10:00:05Z",
+      "status": "failed",
+      "server_response": "550 Mailbox unavailable",
+      "mailing": 2,
+      "client": 2
+    }
+  },
+  {
+    "model": "mailing.mailinglog",
+    "pk": 3,
+    "fields": {
+      "attempt_time": "2025-01-02T10:00:10Z",
+      "status": "success",
+      "server_response": "250 OK: queued as 67890",
+      "mailing": 3,
+      "client": 3
+    }
+  }
+]

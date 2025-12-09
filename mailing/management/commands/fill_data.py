@@ -1,6 +1,7 @@
 from django.core.management import BaseCommand, call_command
 
 from mailing.models import Client, Mailing, MailingLog, Message
+from users.models import User
 
 
 class Command(BaseCommand):
@@ -11,8 +12,8 @@ class Command(BaseCommand):
         Message.objects.all().delete()
         Mailing.objects.all().delete()
         MailingLog.objects.all().delete()
-        call_command("loaddata", "client_fixture.json")
-        call_command("loaddata", "message_fixture.json")
-        call_command("loaddata", "mailing_fixture.json")
-        call_command("loaddata", "mailing_log_fixture.json")
+        User.objects.all().delete()
+        call_command("loaddata", "users_test.json")
+        call_command("loaddata", "mailing_test.json")
+
         self.stdout.write(self.style.SUCCESS("Successfully loaded data from fixture"))

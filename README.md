@@ -76,6 +76,7 @@ REDIS_URL=redis://localhost:6379/0
 
 ### 5. Применение миграций
 ```bash
+python manage.py fill_data
 python manage.py makemigrations
 python manage.py migrate
 ```
