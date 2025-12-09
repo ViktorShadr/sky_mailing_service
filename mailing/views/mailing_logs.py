@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q, Max
+from django.core.cache import cache
+from django.db.models import Count, Max, Q
 from django.views.generic import ListView
 
 from mailing.models import MailingLog, Mailing
@@ -10,6 +11,8 @@ class MailingLogListView(LoginRequiredMixin, ListView):
     template_name = "mailing/mailing_logs.html"
     context_object_name = "mailing_log"
     paginate_by = 6
+
+    cache_timeout = 120
 
     def get_queryset(self):
         """
@@ -28,73 +31,90 @@ class MailingLogListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = self.get_queryset()
+        qs = getattr(self, "object_list", None) or self.get_queryset()
         user = self.request.user
+        cache_prefix = self._get_cache_prefix(user)
 
-        # ===== Глобальные счётчики =====
-        total_attempts = qs.count()
-        success_count = qs.filter(status="success").count()
-        failed_count = qs.filter(status="failed").count()
+        counters = cache.get(f"{cache_prefix}:counters")
 
-        if total_attempts:
-            success_rate = round(success_count / total_attempts * 100)
-            failed_rate = 100 - success_rate
-        else:
-            success_rate = 0
-            failed_rate = 0
+        if counters is None:
+            total_attempts = qs.count()
+            success_count = qs.filter(status="success").count()
+            failed_count = qs.filter(status="failed").count()
 
-        # Сколько рассылок всего у пользователя (или вообще, если менеджер)
-        if user.has_perm("mailing.can_view_all_mailings"):
-            total_mailings = Mailing.objects.count()
-        else:
-            total_mailings = Mailing.objects.filter(owner=user).count()
-
-        # Сколько сообщений реально было отправлено — считаем только успешные попытки
-        total_messages = success_count
-
-        # ===== Статистика по каждой рассылке =====
-        # Берём только те рассылки, по которым есть логи в qs
-        mailings_stats = (
-            Mailing.objects.filter(mailinglog__in=qs)
-            .distinct()
-            .annotate(
-                total_attempts=Count("mailinglog"),
-                success_count=Count(
-                    "mailinglog",
-                    filter=Q(mailinglog__status="success"),
-                ),
-                failed_count=Count(
-                    "mailinglog",
-                    filter=Q(mailinglog__status="failed"),
-                ),
-                last_attempt_time=Max("mailinglog__attempt_time"),
-            )
-            .select_related("message")
-        )
-
-        # Добавим каждому объекту процент успешности
-        for mailing in mailings_stats:
-            if mailing.total_attempts:
-                mailing.success_rate = round(mailing.success_count / mailing.total_attempts * 100)
+            if total_attempts:
+                success_rate = round(success_count / total_attempts * 100)
+                failed_rate = 100 - success_rate
             else:
-                mailing.success_rate = 0
+                success_rate = 0
+                failed_rate = 0
 
-        # ===== Последние попытки отправки =====
-        last_attempts = qs.order_by("-attempt_time")[:10]
+            if user.has_perm("mailing.can_view_all_mailings"):
+                total_mailings = Mailing.objects.count()
+            else:
+                total_mailings = Mailing.objects.filter(owner=user).count()
 
-        # Кладём всё в контекст — имена полей совпадают с теми,
-        # что я использовал в шаблоне статистики
-        context.update(
-            {
+            counters = {
                 "total_mailings": total_mailings,
-                "total_messages": total_messages,
+                "total_messages": success_count,
                 "successful_attempts": success_count,
                 "failed_attempts": failed_count,
                 "success_rate": success_rate,
                 "failed_rate": failed_rate,
+            }
+
+            cache.set(f"{cache_prefix}:counters", counters, self.cache_timeout)
+
+        mailings_stats = cache.get(f"{cache_prefix}:mailings_stats")
+
+        if mailings_stats is None:
+            mailings_stats_qs = (
+                Mailing.objects.filter(mailinglog__in=qs)
+                .distinct()
+                .annotate(
+                    total_attempts=Count("mailinglog"),
+                    success_count=Count(
+                        "mailinglog",
+                        filter=Q(mailinglog__status="success"),
+                    ),
+                    failed_count=Count(
+                        "mailinglog",
+                        filter=Q(mailinglog__status="failed"),
+                    ),
+                    last_attempt_time=Max("mailinglog__attempt_time"),
+                )
+                .select_related("message")
+            )
+
+            mailings_stats = list(mailings_stats_qs)
+
+            for mailing in mailings_stats:
+                if mailing.total_attempts:
+                    mailing.success_rate = round(mailing.success_count / mailing.total_attempts * 100)
+                else:
+                    mailing.success_rate = 0
+
+            cache.set(f"{cache_prefix}:mailings_stats", mailings_stats, self.cache_timeout)
+
+        last_attempts = cache.get(f"{cache_prefix}:last_attempts")
+
+        if last_attempts is None:
+            last_attempts = list(qs.order_by("-attempt_time")[:10])
+            cache.set(f"{cache_prefix}:last_attempts", last_attempts, self.cache_timeout)
+
+        context.update(
+            {
+                **counters,
                 "mailings_stats": mailings_stats,
                 "last_attempts": last_attempts,
             }
         )
 
         return context
+
+    @staticmethod
+    def _get_cache_prefix(user) -> str:
+        if user.has_perm("mailing.can_view_all_mailings"):
+            return "mailinglogs:all"
+
+        return f"mailinglogs:user:{user.pk}"

@@ -1,6 +1,6 @@
 <!--mailing_list.html-->
 {% extends "mailing/base.html" %}
-{% load static %}
+{% load static cache %}
 
 {% block title %}Рассылки — SkyMail{% endblock %}
 
@@ -13,6 +13,7 @@
 </div>
 
 <!--Статистика по рассылкам-->
+{% cache 60 mailing_list_stats request.user.pk %}
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
         <div class="row g-3">
@@ -54,6 +55,7 @@
         </div>
     </div>
 </div>
+{% endcache %}
 
 
 <div class="card border-0 shadow-sm">
@@ -93,7 +95,7 @@
 
                     <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
                     <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
-                    <td>{{ mailing.clients.count }}</td>
+                    <td>{{ mailing.clients_count|default:"0" }}</td>
 
                     <td class="text-end">
                         <a href="{% url 'mailing:mailing_detail' mailing.pk %}"

@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -18,6 +20,8 @@ class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
     context_object_name = "mailings"
     paginate_by = 6
 
+    cache_timeout = 60
+
     def get_queryset(self):
         """
         Возвращаем рассылки текущего пользователя (или все для менеджера)
@@ -28,7 +32,13 @@ class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
         - в детальном представлении (MailingDetailView),
         - при запуске рассылки (run_mailing).
         """
-        qs = super().get_queryset()
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("message")
+            .prefetch_related("clients")
+            .annotate(clients_count=Count("clients", distinct=True))
+        )
 
         for mailing in qs:
             mailing.update_status(save=False)
@@ -39,21 +49,34 @@ class MailingListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
         context = super().get_context_data(**kwargs)
         qs = self.object_list
         now = timezone.now()
+        user = self.request.user
 
-        context["total_mailings"] = qs.count()
-        context["created_mailings"] = qs.filter(status="created").count()
-        context["started_mailings"] = qs.filter(status="started").count()
-        context["finished_mailings"] = qs.filter(status="finished").count()
+        cache_key = self._get_cache_key(user)
 
-        # Активные по ТЗ: сейчас в интервале и статус "Запущена"
-        context["active_mailings"] = qs.filter(
-            status="started",
-            start_time__lte=now,
-            end_time__gte=now,
-        ).count()
+        stats = cache.get(cache_key)
+
+        if stats is None:
+            stats = {
+                "total_mailings": qs.count(),
+                "created_mailings": qs.filter(status="created").count(),
+                "started_mailings": qs.filter(status="started").count(),
+                "finished_mailings": qs.filter(status="finished").count(),
+                "active_mailings": qs.filter(
+                    status="started",
+                    start_time__lte=now,
+                    end_time__gte=now,
+                ).count(),
+            }
+            cache.set(cache_key, stats, self.cache_timeout)
+
+        context.update(stats)
 
         context["now"] = now
         return context
+
+    @staticmethod
+    def _get_cache_key(user) -> str:
+        return f"mailings:summary:user:{user.pk}"
 
 
 class MailingCreateView(LoginRequiredMixin, CreateView):

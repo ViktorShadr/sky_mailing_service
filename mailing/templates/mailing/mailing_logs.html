@@ -1,4 +1,5 @@
 {% extends "mailing/base.html" %}
+{% load cache %}
 
 {% block title %}Статистика рассылок — SkyMail{% endblock %}
 
@@ -11,6 +12,7 @@
 </p>
 
 <!-- Верхний ряд: общие показатели -->
+{% cache 120 mailing_logs_top request.user.pk %}
 <div class="row g-4 mb-4 justify-content-center">
     <div class="col-md-4">
         <div class="card border-0 text-center p-4">
@@ -77,8 +79,10 @@
         </div>
     </div>
 </div>
+{% endcache %}
 
 <!-- Статистика по каждой рассылке -->
+{% cache 120 mailing_logs_mailings request.user.pk %}
 <div class="card border-0 mb-5">
     <div class="card-body">
         <h4 class="card-title mb-3 text-primary">Эффективность по рассылкам</h4>
@@ -137,8 +141,10 @@
         {% endif %}
     </div>
 </div>
+{% endcache %}
 
 <!-- Последние попытки отправки -->
+{% cache 60 mailing_logs_attempts request.user.pk %}
 <div class="card border-0 mb-4">
     <div class="card-body">
         <h4 class="card-title mb-3 text-primary">Последние попытки отправки</h4>
@@ -198,5 +204,6 @@
         {% endif %}
     </div>
 </div>
+{% endcache %}
 
 {% endblock %}
