@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.db.models import Count, Max, Q
 from django.views.generic import ListView
 
-from mailing.models import MailingLog, Mailing
+from mailing.models import Mailing, MailingLog
 
 
 class MailingLogListView(LoginRequiredMixin, ListView):

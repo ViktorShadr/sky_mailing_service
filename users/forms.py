@@ -1,6 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, SetPasswordForm, PasswordResetForm
-from django.urls import reverse
+from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm, UserCreationForm
 
 from users.models import User
 
@@ -88,10 +87,11 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("avatar", "phone")
+        fields = ("avatar", "phone", "country")
         widgets = {
             "avatar": forms.FileInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
+            "country": forms.Select(attrs={"class": "form-control"}),
         }
 
     def __init__(self, *args, **kwargs):

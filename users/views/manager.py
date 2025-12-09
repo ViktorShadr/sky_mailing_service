@@ -1,18 +1,20 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import DetailView, ListView, TemplateView
 
-from mailing.models import Mailing, Client, MailingLog
+from mailing.models import Client, Mailing, MailingLog
 from users.mixins import ManagerRequiredMixin
 from users.models import User
 
 
 class ManagerDashboardView(ManagerRequiredMixin, TemplateView):
+    """Главная панель управления менеджера с общей статистикой."""
+
     template_name = "users/manager/manager_dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -34,6 +36,8 @@ class ManagerDashboardView(ManagerRequiredMixin, TemplateView):
 
 
 class ManagerClientsListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
+    """Список всех клиентов в системе для просмотра менеджером."""
+
     model = Client
     template_name = "users/manager/manager_clients_list.html"
     context_object_name = "clients"
@@ -45,6 +49,8 @@ class ManagerClientsListView(PermissionRequiredMixin, ManagerRequiredMixin, List
 
 
 class ManagerClientDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
+    """Детальная информация о клиенте для менеджера."""
+
     model = Client
     template_name = "users/manager/manager_client_detail.html"
     context_object_name = "client"
@@ -52,6 +58,8 @@ class ManagerClientDetailView(PermissionRequiredMixin, ManagerRequiredMixin, Det
 
 
 class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
+    """Список пользователей для управления доступом и блокировки."""
+
     model = User
     template_name = "users/manager/manager_users_list.html"
     context_object_name = "users"
@@ -70,9 +78,7 @@ class ManagerUsersListView(PermissionRequiredMixin, ManagerRequiredMixin, ListVi
 
 
 class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
-    """
-    Карточка одного пользователя под шаблон manager_user_detail.html
-    """
+    """Детальная информация о пользователе с его клиентами и рассылками."""
 
     model = User
     template_name = "users/manager/manager_user_detail.html"
@@ -100,6 +106,7 @@ class ManagerUserDetailView(PermissionRequiredMixin, ManagerRequiredMixin, Detai
 
 
 def is_manager(user: User) -> bool:
+    """Проверяет, является ли пользователь менеджером."""
     return user.is_authenticated and user.is_manager
 
 
@@ -107,6 +114,7 @@ def is_manager(user: User) -> bool:
 @user_passes_test(is_manager)
 @login_required
 def manager_toggle_block(request, pk):
+    """Переключает статус блокировки пользователя."""
     user_obj = get_object_or_404(
         User.objects.filter(is_manager=False).exclude(is_staff=True, is_superuser=True),
         pk=pk,
@@ -117,6 +125,8 @@ def manager_toggle_block(request, pk):
 
 
 class ManagerMailingsListView(PermissionRequiredMixin, ManagerRequiredMixin, ListView):
+    """Список всех рассылок в системе для мониторинга менеджером."""
+
     model = Mailing
     template_name = "users/manager/manager_mailings_list.html"
     context_object_name = "mailings"
@@ -138,6 +148,8 @@ class ManagerMailingsListView(PermissionRequiredMixin, ManagerRequiredMixin, Lis
 
 
 class ManagerMailingDetailView(PermissionRequiredMixin, ManagerRequiredMixin, DetailView):
+    """Детальная информация о рассылке с логами отправки и статистикой."""
+
     model = Mailing
     template_name = "users/manager/manager_mailing_detail.html"
     context_object_name = "mailing"
@@ -159,12 +171,7 @@ class ManagerMailingDetailView(PermissionRequiredMixin, ManagerRequiredMixin, De
         before_window = mailing.start_time > now
         after_window = mailing.end_time < now
 
-        logs_qs = (
-            MailingLog.objects
-            .filter(mailing=mailing)
-            .select_related("client")
-            .order_by("-attempt_time")
-        )
+        logs_qs = MailingLog.objects.filter(mailing=mailing).select_related("client").order_by("-attempt_time")
 
         stats = logs_qs.aggregate(
             total=Count("id"),
@@ -183,6 +190,8 @@ class ManagerMailingDetailView(PermissionRequiredMixin, ManagerRequiredMixin, De
 
 
 class ManagerMailingDisableView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """Представление для принудительного отключения рассылки менеджером."""
+
     permission_required = "mailing.can_disable_mailings"
 
     def post(self, request, pk):

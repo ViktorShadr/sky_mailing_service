@@ -14,13 +14,15 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
 
-from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+from users.forms import UserLoginForm, UserProfileForm, UserRegistrationForm
 from users.models import User
 
 logger = logging.getLogger("users")
 
 
 class CustomLoginView(LoginView):
+    """Кастомное представление для входа пользователя с логированием попыток."""
+
     template_name = "users/login.html"
     form_class = UserLoginForm
 
@@ -42,6 +44,8 @@ class CustomLoginView(LoginView):
 
 
 class CustomLogoutView(LogoutView):
+    """Представление для выхода пользователя с логированием."""
+
     next_page = reverse_lazy("mailing:index")
 
     def dispatch(self, request, *args, **kwargs):
@@ -53,6 +57,8 @@ class CustomLogoutView(LogoutView):
 
 
 class CustomRegistrationView(CreateView):
+    """Обработка регистрации нового пользователя с отправкой подтверждения на email."""
+
     template_name = "users/registration.html"
     form_class = UserRegistrationForm
     success_url = reverse_lazy("users:registration_done")
@@ -90,17 +96,11 @@ class CustomRegistrationView(CreateView):
             "site_name": "SkyMail",
         }
 
-        subject = render_to_string(
-            "users/email/registration_confirm_subject.txt", context
-        ).strip()
+        subject = render_to_string("users/email/registration_confirm_subject.txt", context).strip()
 
-        message = render_to_string(
-            "users/email/registration_confirm_email.txt", context
-        )
+        message = render_to_string("users/email/registration_confirm_email.txt", context)
 
-        html_message = render_to_string(
-            "users/email/registration_confirm_email.html", context
-        )
+        html_message = render_to_string("users/email/registration_confirm_email.html", context)
 
         from_email = getattr(settings, "DEFAULT_FROM_EMAIL", os.getenv("FROM_EMAIL"))
 
@@ -114,10 +114,14 @@ class CustomRegistrationView(CreateView):
 
 
 class RegistrationDoneView(TemplateView):
+    """Отображает страницу успешной регистрации с инструкцией по подтверждению email."""
+
     template_name = "users/registration_done.html"
 
 
 class ConfirmEmailView(TemplateView):
+    """Обрабатывает подтверждение email пользователя по ссылке из письма."""
+
     template_name = "users/confirm_email.html"
 
     def get_success_url(self):
@@ -142,6 +146,8 @@ class ConfirmEmailView(TemplateView):
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
+    """Отображает детальную информацию о профиле текущего пользователя."""
+
     model = User
     template_name = "users/profile_detail.html"
     context_object_name = "user"
@@ -151,6 +157,8 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """Редактирование профиля пользователя."""
+
     model = User
     form_class = UserProfileForm
     template_name = "users/profile_form.html"
@@ -161,6 +169,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class ProfileDeleteView(LoginRequiredMixin, DeleteView):
+    """Удаление аккаунта пользователя с подтверждением."""
+
     model = User
     template_name = "users/profile_confirm_delete.html"
     success_url = reverse_lazy("mailing:index")

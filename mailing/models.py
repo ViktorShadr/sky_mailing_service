@@ -6,11 +6,12 @@ from django.utils import timezone
 
 from users.models import User
 
-
 logger = logging.getLogger("mailing")
 
 
 class Client(models.Model):
+    """Модель клиента для рассылок. Хранит контактные данные и информацию о владельце."""
+
     email = models.EmailField(unique=True, max_length=255)
     name = models.CharField(max_length=255)
     comment = models.TextField(max_length=255)
@@ -35,6 +36,8 @@ class Client(models.Model):
 
 
 class Message(models.Model):
+    """Модель сообщения для рассылок. Содержит тему, текст и ссылку на владельца."""
+
     subject = models.CharField("Тема", max_length=255)
     body = models.TextField("Тело сообщения")
     owner = models.ForeignKey(
@@ -58,6 +61,8 @@ class Message(models.Model):
 
 
 class Mailing(models.Model):
+    """Модель рассылки. Управляет временем отправки, статусом и связью с сообщениями и клиентами."""
+
     start_time = models.DateTimeField("Дата и время начала отправки")
     end_time = models.DateTimeField("Дата и время окончания отправки")
     owner = models.ForeignKey(
@@ -98,7 +103,7 @@ class Mailing(models.Model):
                 raise ValidationError({"end_time": "Дата окончания рассылки должна быть позже даты начала."})
 
     def update_status(self, save=True):
-        """Пересчитывает статус на основе текущего времени и интервала."""
+        """Обновляет статус рассылки на основе текущего времени и интервала отправки."""
         now = timezone.now()
 
         if now < self.start_time:
@@ -133,6 +138,8 @@ class Mailing(models.Model):
 
 
 class MailingLog(models.Model):
+    """Лог попыток отправки рассылки. Фиксирует статус и ответ сервера."""
+
     attempt_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=(("success", "Успешно"), ("failed", "Не успешно")))
     server_response = models.TextField()

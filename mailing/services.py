@@ -6,11 +6,14 @@ from django.utils import timezone
 
 from .models import Mailing, MailingLog
 
-
 logger = logging.getLogger("mailing")
 
 
 def run_mailing(mailing: Mailing) -> dict:
+    """
+    Выполняет рассылку сообщения указанным клиентам.
+    Возвращает словарь с результатами выполнения рассылки.
+    """
     logger.info("Запуск рассылки id=%s", mailing.id)
     now = timezone.now()
 

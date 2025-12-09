@@ -8,13 +8,12 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from mailing.forms import MailingForm
+from mailing.mixins import OwnerAccessMixin, OwnerQuerysetMixin
 from mailing.models import Mailing, MailingLog
 from mailing.services import run_mailing
-from mailing.mixins import OwnerQuerysetMixin, OwnerAccessMixin
-
 
 logger = logging.getLogger("mailing")
 
@@ -182,19 +181,9 @@ class MailingDetailView(LoginRequiredMixin, OwnerQuerysetMixin, DetailView):
         before_window = mailing.start_time > now
         after_window = mailing.end_time < now
 
-        can_run = (
-            not interval_invalid
-            and not before_window
-            and not after_window
-            and mailing.status != "finished"
-        )
+        can_run = not interval_invalid and not before_window and not after_window and mailing.status != "finished"
 
-        logs_qs = (
-            MailingLog.objects
-            .filter(mailing=mailing)
-            .select_related("client")
-            .order_by("-attempt_time")
-        )
+        logs_qs = MailingLog.objects.filter(mailing=mailing).select_related("client").order_by("-attempt_time")
 
         stats = logs_qs.aggregate(
             total=Count("id"),

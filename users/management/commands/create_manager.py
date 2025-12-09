@@ -1,5 +1,5 @@
-from django.core.management import BaseCommand
 from django.contrib.auth.models import Group
+from django.core.management import BaseCommand
 
 from users.models import User
 

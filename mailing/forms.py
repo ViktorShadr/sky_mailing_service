@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Client, Message, Mailing
+from .models import Client, Mailing, Message
 
 
 class ClientForm(forms.ModelForm):
@@ -12,9 +12,7 @@ class ClientForm(forms.ModelForm):
         widgets = {
             "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Введите email"}),
             "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Введите ФИО"}),
-            "comment": forms.Textarea(
-                attrs={"class": "form-control", "placeholder": "Комментарий", "rows": 3}
-            ),
+            "comment": forms.Textarea(attrs={"class": "form-control", "placeholder": "Комментарий", "rows": 3}),
         }
 
         labels = {

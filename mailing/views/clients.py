@@ -1,10 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView, DetailView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from mailing.forms import ClientForm
+from mailing.mixins import OwnerAccessMixin, OwnerQuerysetMixin
 from mailing.models import Client
-from mailing.mixins import OwnerQuerysetMixin, OwnerAccessMixin
 
 
 class ClientListView(LoginRequiredMixin, OwnerQuerysetMixin, ListView):
@@ -40,7 +40,6 @@ class ClientDetailView(LoginRequiredMixin, OwnerAccessMixin, DetailView):
     model = Client
     template_name = "mailing/client_detail.html"
     context_object_name = "client"
-
 
 
 class ClientDeleteView(LoginRequiredMixin, OwnerAccessMixin, DeleteView):

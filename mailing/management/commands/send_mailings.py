@@ -6,7 +6,6 @@ from django.utils import timezone
 from mailing.models import Mailing
 from mailing.services import run_mailing
 
-
 logger = logging.getLogger("mailing")
 
 
@@ -41,11 +40,7 @@ class Command(BaseCommand):
             try:
                 result = run_mailing(mailing)
             except Exception as exc:  # pragma: no cover - защита от неожиданных сбоев
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"Рассылка #{mailing.pk} завершилась с ошибкой исполнения: {exc}"
-                    )
-                )
+                self.stdout.write(self.style.ERROR(f"Рассылка #{mailing.pk} завершилась с ошибкой исполнения: {exc}"))
                 errors += 1
                 continue
 
@@ -60,9 +55,7 @@ class Command(BaseCommand):
                 )
             else:
                 error_message = result.get("error", "Неизвестная ошибка")
-                self.stdout.write(
-                    self.style.ERROR(f"Рассылка #{mailing.pk} не запущена: {error_message}")
-                )
+                self.stdout.write(self.style.ERROR(f"Рассылка #{mailing.pk} не запущена: {error_message}"))
                 errors += 1
 
         logger.info(

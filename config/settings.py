@@ -11,6 +11,7 @@ LOG_DIR.mkdir(exist_ok=True)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+
 def env_bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).lower() in {"1", "true", "yes", "on"}
 
