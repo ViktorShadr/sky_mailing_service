@@ -1,6 +1,8 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import CharField
+from django_countries.fields import CountryField
 
 
 class CustomUserManager(BaseUserManager):
@@ -32,8 +34,8 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)
     avatar = models.ImageField(upload_to="users/avatars", blank=True, null=True)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    country = models.CharField(max_length=100, blank=True, null=True)
+    phone = CharField(blank=True, null=True)
+    country = CountryField(max_length=100, blank=True, null=True)
 
     is_manager = models.BooleanField(
         default=False, verbose_name="Менеджер", help_text="Отметьте, если пользователь является менеджером"

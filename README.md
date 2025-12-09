@@ -76,12 +76,13 @@ REDIS_URL=redis://localhost:6379/0
 
 ### 5. Применение миграций
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
 ### 6. Создание суперпользователя
 ```bash
-python manage.py createsuperuser
+python manage.py createsu
 ```
 ### 7. Создание менеджера
 ```bash

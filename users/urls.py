@@ -1,32 +1,12 @@
 from django.urls import path
 
-from users.views.manager import (
-    ManagerClientDetailView,
-    ManagerClientsListView,
-    ManagerDashboardView,
-    ManagerMailingDetailView,
-    ManagerMailingDisableView,
-    ManagerMailingsListView,
-    ManagerUserDetailView,
-    ManagerUsersListView,
-    manager_toggle_block,
-)
-from users.views.password_reset import (
-    UserPasswordResetCompleteView,
-    UserPasswordResetConfirmView,
-    UserPasswordResetDoneView,
-    UserPasswordResetView,
-)
-from users.views.user import (
-    ConfirmEmailView,
-    CustomLoginView,
-    CustomLogoutView,
-    CustomRegistrationView,
-    ProfileDeleteView,
-    ProfileDetailView,
-    ProfileUpdateView,
-    RegistrationDoneView,
-)
+from users.views.manager import (ManagerClientDetailView, ManagerClientsListView, ManagerDashboardView,
+                                 ManagerMailingDetailView, ManagerMailingDisableView, ManagerMailingsListView,
+                                 ManagerUserDetailView, ManagerUsersListView, manager_toggle_block)
+from users.views.password_reset import (UserPasswordResetCompleteView, UserPasswordResetConfirmView,
+                                        UserPasswordResetDoneView, UserPasswordResetView)
+from users.views.user import (ConfirmEmailView, CustomLoginView, CustomLogoutView, CustomRegistrationView,
+                              ProfileDeleteView, ProfileDetailView, ProfileUpdateView, RegistrationDoneView)
 
 app_name = "users"
 
