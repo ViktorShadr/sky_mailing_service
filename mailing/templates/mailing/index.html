@@ -1,0 +1,40 @@
+{% extends "mailing/base.html" %}
+{% load cache %}
+
+{% block title %}Главная — SkyMail{% endblock %}
+
+{% block content %}
+  <h1 class="text-center mb-4 text-primary">Панель управления рассылками</h1>
+
+  {% cache 120 index_stats request.user.pk %}
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4">
+        <div class="card border-0 text-center p-4">
+          <div class="card-body">
+            <h5 class="card-title text-muted">Всего рассылок</h5>
+            <h2 class="display-5 fw-bold text-primary">{{ total_mailings }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-0 text-center p-4">
+          <div class="card-body">
+            <h5 class="card-title text-muted">Активные рассылки</h5>
+            <h2 class="display-5 fw-bold text-success">{{ active_mailings }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-0 text-center p-4">
+          <div class="card-body">
+            <h5 class="card-title text-muted">Уникальных получателей</h5>
+            <h2 class="display-5 fw-bold text-info">{{ unique_clients }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endcache %}
+
+{% endblock %}

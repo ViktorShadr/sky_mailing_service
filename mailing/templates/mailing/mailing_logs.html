@@ -1,0 +1,209 @@
+{% extends "mailing/base.html" %}
+{% load cache %}
+
+{% block title %}Статистика рассылок — SkyMail{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4 text-primary">Статистика и отчёты по рассылкам</h1>
+
+<p class="text-center text-muted mb-5">
+    Здесь собрана сводка по вашим рассылкам: общее количество отправленных сообщений,
+    успешные и неуспешные попытки, а также эффективность по каждой рассылке.
+</p>
+
+<!-- Верхний ряд: общие показатели -->
+{% cache 120 mailing_logs_top request.user.pk %}
+<div class="row g-4 mb-4 justify-content-center">
+    <div class="col-md-4">
+        <div class="card border-0 text-center p-4">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Всего рассылок</h5>
+                <h2 class="display-5 fw-bold text-primary">{{ total_mailings|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 text-center p-4">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Отправленных сообщений</h5>
+                <h2 class="display-5 fw-bold text-primary">{{ total_messages|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Второй ряд: успешные/неуспешные попытки -->
+<div class="row g-4 mb-5 justify-content-center">
+    <div class="col-md-4">
+        <div class="card border-0 h-100 p-4">
+            <div class="card-body">
+                <h5 class="card-title text-muted mb-3">Успешные попытки</h5>
+                <div class="d-flex align-items-baseline justify-content-between mb-2">
+                    <span class="h3 mb-0 fw-bold text-success">{{ successful_attempts|default:0 }}</span>
+                    <span class="text-muted">
+              {{ success_rate|default:"0" }}%
+            </span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-success"
+                         role="progressbar"
+                         style="width: {{ success_rate|default:0 }}%;"
+                         aria-valuenow="{{ success_rate|default:0 }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 h-100 p-4">
+            <div class="card-body">
+                <h5 class="card-title text-muted mb-3">Неуспешные попытки</h5>
+                <div class="d-flex align-items-baseline justify-content-between mb-2">
+                    <span class="h3 mb-0 fw-bold text-danger">{{ failed_attempts|default:0 }}</span>
+                    <span class="text-muted">
+              {{ failed_rate|default:"0" }}%
+            </span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-danger"
+                         role="progressbar"
+                         style="width: {{ failed_rate|default:0 }}%;"
+                         aria-valuenow="{{ failed_rate|default:0 }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endcache %}
+
+<!-- Статистика по каждой рассылке -->
+{% cache 120 mailing_logs_mailings request.user.pk %}
+<div class="card border-0 mb-5">
+    <div class="card-body">
+        <h4 class="card-title mb-3 text-primary">Эффективность по рассылкам</h4>
+
+        {% if mailings_stats %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Рассылка</th>
+                    <th class="text-center">Попыток всего</th>
+                    <th class="text-center">Успешно</th>
+                    <th class="text-center">Неуспешно</th>
+                    <th class="text-center">Успешность</th>
+                    <th class="text-center">Последняя отправка</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for stat in mailings_stats %}
+                <tr>
+                    <td>
+                        <span class="fw-semibold">{{ stat.message.subject }}</span><br>
+                        <small class="text-muted">ID: {{ stat.id }}</small>
+                    </td>
+
+                    <td class="text-center">
+                        {{ stat.total_attempts|default:0 }}
+                    </td>
+                    <td class="text-center text-success">
+                        {{ stat.success_count|default:0 }}
+                    </td>
+                    <td class="text-center text-danger">
+                        {{ stat.failed_count|default:0 }}
+                    </td>
+                    <td class="text-center">
+                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                      {{ stat.success_rate|default:"0" }}%
+                    </span>
+                    </td>
+                    <td class="text-center">
+                        {% if stat.last_attempt_time %}
+                        {{ stat.last_attempt_time|date:"d.m.Y H:i" }}
+                        {% else %}
+                        <span class="text-muted">не отправлялась</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">
+            У вас ещё нет попыток отправки по рассылкам.
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endcache %}
+
+<!-- Последние попытки отправки -->
+{% cache 60 mailing_logs_attempts request.user.pk %}
+<div class="card border-0 mb-4">
+    <div class="card-body">
+        <h4 class="card-title mb-3 text-primary">Последние попытки отправки</h4>
+
+        {% if last_attempts %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Дата и время</th>
+                    <th>Рассылка</th>
+                    <th>Клиент</th>
+                    <th class="text-center">Статус</th>
+                    <th>Ответ сервера</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for log in last_attempts %}
+                <tr>
+                    <td>
+                        {{ log.attempt_time|date:"d.m.Y H:i" }}
+                    </td>
+                    <td>
+                    <span class="fw-semibold">
+                      {{ log.mailing.message.subject }}
+                    </span><br>
+                        <small class="text-muted">ID: {{ log.mailing.id }}</small>
+                    </td>
+                    <td>
+                        {% if log.client %}
+                        {{ log.client.email }}
+                        {% else %}
+                        <span class="text-muted">не указан</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if log.status == "success" %}
+                        <span class="badge bg-success">Успешно</span>
+                        {% else %}
+                        <span class="badge bg-danger">Неуспешно</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">
+                            {{ log.server_response|truncatechars:80 }}
+                        </small>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">
+            Попыток отправки ещё не было.
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endcache %}
+
+{% endblock %}

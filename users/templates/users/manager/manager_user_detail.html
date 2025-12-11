@@ -1,0 +1,104 @@
+<!-- manager_user_detail.html -->
+{% extends "mailing/base.html" %}
+{% load static %}
+
+{% block title %}Пользователь {{ view_user.email }} — SkyMail{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Пользователь: {{ view_user.email }}</h1>
+
+    {% if perms.users.can_block_users %}
+    <form action="{% url 'users:manager_toggle_block' view_user.pk %}"
+          method="post" class="d-inline">
+        {% csrf_token %}
+        {% if not view_user.is_active %}
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-unlock-fill me-1"></i>Разблокировать
+        </button>
+        {% else %}
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-lock-fill me-1"></i>Заблокировать
+        </button>
+        {% endif %}
+    </form>
+    {% endif %}
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 h-100">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Профиль</h5>
+                <p class="mb-1"><strong>Email:</strong> {{ view_user.email }}</p>
+                <p class="mb-1"><strong>Телефон:</strong> {{ view_user.phone|default:"Не указан" }}</p>
+                <p class="mb-1"><strong>Страна:</strong> {{ view_user.country|default:"Не указана" }}</p>
+                <p class="mb-1">
+                    <strong>Статус:</strong>
+                    {% if not view_user.is_active %}
+                    <span class="badge bg-danger">Заблокирован</span>
+                    {% else %}
+                    <span class="badge bg-success">Активен</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 h-100">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Статистика</h5>
+                <p class="mb-1"><strong>Клиентов:</strong> {{ view_user.clients_count|default:"0" }}</p>
+                <p class="mb-1"><strong>Рассылок:</strong> {{ view_user.mailings_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Последние клиенты</h5>
+                <ul class="list-group list-group-flush">
+                    {% for client in last_clients %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ client.email }} — {{ client.name|default:"(без имени)" }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">
+                        Клиенты не найдены.
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Последние рассылки</h5>
+                <ul class="list-group list-group-flush">
+                    {% for mailing in last_mailings %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ mailing.message.subject|default:"(без темы)" }}</span>
+                        <span class="badge bg-light text-dark">{{ mailing.get_status_display }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">
+                        Рассылки не найдены.
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+    <a href="{% url 'users:manager_users_list' %}" class="btn btn-primary mt-3">
+        Назад в список пользователей
+    </a>
+</div>
+{% endblock %}

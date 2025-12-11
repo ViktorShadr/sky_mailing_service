@@ -1,0 +1,14 @@
+<!--confirm_email_invalid.html-->
+{% extends "mailing/base.html" %}
+{% block title %}Ошибка подтверждения{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-danger">
+        <h4 class="alert-heading">Не удалось подтвердить email</h4>
+        <p>Ссылка для подтверждения недействительна или устарела. Попробуйте зарегистрироваться снова.</p>
+    </div>
+    <a href="{% url 'users:registration' %}" class="btn btn-primary">Зарегистрироваться</a>
+    <a href="{% url 'mailing:index' %}" class="btn btn-secondary ms-2">На главную</a>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+<!--confirm_email.html-->
+{% extends "mailing/base.html" %}
+
+{% block title %}Email подтверждён{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-3">Email успешно подтверждён!</h2>
+
+    <p>
+        Ваш аккаунт активирован. Теперь вы можете войти в систему
+        и пользоваться сервисом рассылок.
+    </p>
+
+    <a href="{% url 'users:login' %}" class="btn btn-primary mt-3">Войти</a>
+</div>
+{% endblock %}

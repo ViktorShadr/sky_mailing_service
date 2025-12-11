@@ -1,0 +1,119 @@
+<!-- manager_dashboard.html -->
+{% extends "mailing/base.html" %}
+
+{% block title %}Панель менеджера — SkyMail{% endblock %}
+
+{% block content %}
+  <h1 class="text-center mb-4 text-primary">Панель менеджера сервиса</h1>
+
+  {# --- Блок общей статистики по пользователям --- #}
+  <div class="row g-4 justify-content-center mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 text-center p-4">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Пользователей сервиса</h5>
+          <h2 class="display-5 fw-bold text-primary">{{ total_users }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 text-center p-4">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Заблокированные пользователи</h5>
+          <h2 class="display-5 fw-bold text-danger">{{ blocked_users }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 text-center p-4">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Активные пользователи</h5>
+          <h2 class="display-5 fw-bold text-success">{{ active_users }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# --- Блок статистики по рассылкам --- #}
+  <div class="row g-4 justify-content-center mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 text-center p-4">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Всего рассылок</h5>
+          <h2 class="display-5 fw-bold text-primary">{{ total_mailings }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 text-center p-4">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Активные рассылки</h5>
+          <h2 class="display-5 fw-bold text-success">{{ active_mailings }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 text-center p-4">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Отключённые рассылки</h5>
+          <h2 class="display-5 fw-bold text-warning">{{ disabled_mailings }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# --- Блок быстрых действий менеджера --- #}
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+      <div class="card border-0 h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-primary">Пользователи</h5>
+            <p class="card-text text-muted">
+              Просмотр списка всех пользователей сервиса и управление блокировками.
+            </p>
+          </div>
+          <a href="{% url 'users:manager_users_list' %}" class="btn btn-outline-primary mt-2">
+            Открыть список пользователей
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-primary">Все рассылки</h5>
+            <p class="card-text text-muted">
+              Обзор всех рассылок сервиса и отключение подозрительной активности.
+            </p>
+          </div>
+          <a href="{% url 'users:manager_mailings_list' %}" class="btn btn-outline-primary mt-2">
+            Открыть все рассылки
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-primary">Клиенты</h5>
+            <p class="card-text text-muted">
+              Просмотр всех клиентов сервиса.
+            </p>
+          </div>
+          <a href="{% url 'users:manager_clients_list' %}" class="btn btn-outline-primary mt-2">
+            Открыть всех клиентов
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
