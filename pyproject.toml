@@ -9,6 +9,44 @@ packages = [{ include = "sky_mailing_service" }]
 [tool.poetry.dependencies]
 python = ">=3.13,<4.0"
 django = ">=5.2.8,<6.0.0"
+python-dotenv = "^1.2.1"
+psycopg2-binary = "^2.9.11"
+pillow = "^12.0.0"
+django-countries = "^8.2.0"
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^9.7.0"
+django-redis = "^6.0.0"
+
+[tool.black]
+line-length = 119
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+line_length = 119
+
+[tool.mypy]
+disallow_untyped_defs = true
+warn_return_any = true
+exclude = 'venv'
+
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.3.0"
+isort = "^7.0.0"
+black = "^25.11.0"
+
+
+[tool.poetry.group.types.dependencies]
+mypy = "^1.19.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

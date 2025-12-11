@@ -1,0 +1,26 @@
+<!--mailing_confirm_delete.html-->
+{% extends "mailing/base.html" %}
+{% load static %}
+
+{% block title %}Удаление рассылки{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-danger">Удаление рассылки</h1>
+
+    <p class="mb-3">
+        Вы действительно хотите удалить рассылку
+        <strong>«{{ object }}»</strong>?
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            Да, удалить
+        </button>
+        <a href="{% url 'mailing:mailing_detail' mailing.pk %}" class="btn btn-secondary">
+            Отмена
+        </a>
+    </form>
+</div>
+{% endblock %}

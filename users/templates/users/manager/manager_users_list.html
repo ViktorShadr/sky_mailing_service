@@ -1,0 +1,103 @@
+<!-- manager_users_list.html -->
+{% extends "mailing/base.html" %}
+{% load static %}
+
+{% block title %}Пользователи сервиса — SkyMail{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Пользователи сервиса</h1>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Email</th>
+                    <th>Клиентов</th>
+                    <th>Рассылок</th>
+                    <th>Статус</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.clients_count|default:"0" }}</td>
+                    <td>{{ user.mailings_count|default:"0" }}</td>
+                    <td>
+                        {% if not user.is_active %}
+                        <span class="badge bg-danger">Заблокирован</span>
+                        {% else %}
+                        <span class="badge bg-success">Активен</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'users:manager_user_detail' user.pk %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-eye me-1"></i>Подробнее
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-3 text-muted">
+                        Пользователи ещё не добавлены.
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <a href="{% url 'users:manager_dashboard' %}" class="btn btn-primary mt-3">
+        Назад в панель менеджера
+    </a>
+
+</div>
+
+{# Пагинация #}
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Назад</span>
+        </li>
+        {% endif %}
+
+        {% for page_num in paginator.page_range %}
+        {% if page_obj.number == page_num %}
+        <li class="page-item active">
+            <span class="page-link">{{ page_num }}</span>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Вперёд</span>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

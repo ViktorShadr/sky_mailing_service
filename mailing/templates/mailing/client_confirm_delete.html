@@ -1,0 +1,16 @@
+<!--client_confirm_delete.html-->
+{% extends "mailing/base.html" %}
+
+{% block title %}Удаление клиента — SkyMail{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Удаление клиента</h1>
+
+<p>Вы действительно хотите удалить клиента <strong>{{ object.name }}</strong> ({{ object.email }})?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'mailing:client_detail' client.pk %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

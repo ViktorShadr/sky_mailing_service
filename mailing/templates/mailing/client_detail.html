@@ -1,0 +1,87 @@
+<!--client_detail.html-->
+{% extends "mailing/base.html" %}
+
+{% block title %}Клиент — {{ client.name|default:"Без имени" }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Клиент</h1>
+</div>
+
+<div class="row g-4">
+    <!-- Левая колонка: информация о клиенте -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+
+                <h5 class="card-title mb-3">Информация о клиенте</h5>
+
+                <dl class="row mb-0">
+
+                    <dt class="col-sm-3">Email</dt>
+                    <dd class="col-sm-9">
+                        <strong>{{ client.email }}</strong>
+                    </dd>
+
+                    <dt class="col-sm-3">ФИО</dt>
+                    <dd class="col-sm-9">
+                        {% if client.full_name %}
+                            {{ client.full_name }}
+                        {% else %}
+                            <span class="text-muted">(не указано)</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-3">Комментарий</dt>
+                    <dd class="col-sm-9">
+                        {% if client.comment %}
+                            <p class="mb-0">{{ client.comment|linebreaksbr }}</p>
+                        {% else %}
+                            <span class="text-muted">(нет комментария)</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-3 mt-3">Владелец</dt>
+                    <dd class="col-sm-9 mt-3">
+                        {{ client.owner.email|default:client.owner.username|default:"—" }}
+                    </dd>
+
+                </dl>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая колонка: блок действий -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <h5 class="card-title mb-3">Действия</h5>
+
+                <div class="d-grid gap-2">
+
+                    {% if client.owner == user %}
+                        <a href="{% url 'mailing:client_update' client.pk %}"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i> Редактировать
+                        </a>
+
+                        <a href="{% url 'mailing:client_delete' client.pk %}"
+                           class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i> Удалить
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'mailing:client_list' %}"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Назад к списку клиентов
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!--message_detail.html-->
+{% extends "mailing/base.html" %}
+
+{% block title %}Сообщение — {{ message.subject|default:"(без темы)" }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Сообщение</h1>
+</div>
+
+<div class="row g-4">
+    <!-- Левая колонка: информация о сообщении -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Параметры сообщения</h5>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Тема</dt>
+                    <dd class="col-sm-9">
+                        <strong>{{ message.subject|default:"(без темы)" }}</strong>
+                    </dd>
+
+                    <dt class="col-sm-3">Тело письма</dt>
+                    <dd class="col-sm-9">
+                        {% if message.body %}
+                            <p class="mb-0">{{ message.body|linebreaksbr }}</p>
+                        {% else %}
+                            <span class="text-muted">(пустое сообщение)</span>
+                        {% endif %}
+                    </dd>
+
+                    {# Если у сообщения есть владелец — покажем его #}
+                    <dt class="col-sm-3 mt-3">Владелец</dt>
+                    <dd class="col-sm-9 mt-3">
+                        {{ message.owner.email|default:message.owner.username|default:"—" }}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая колонка: действия -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Действия</h5>
+
+                <div class="d-grid gap-2">
+                    {# Кнопки редактирования/удаления только для владельца (как в mailing_detail) #}
+                    {% if message.owner == user %}
+                        <a href="{% url 'mailing:message_update' message.pk %}"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i> Редактировать
+                        </a>
+
+                        <a href="{% url 'mailing:message_delete' message.pk %}"
+                           class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i> Удалить
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'mailing:message_list' %}"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Назад к списку сообщений
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
