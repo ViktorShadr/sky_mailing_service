@@ -28,8 +28,8 @@
 
 ### 1. Клонирование репозитория
 ```bash
-git clone git@github.com:ViktorShadr/sky_mailing_service.git
-cd sky_mailing_service
+git clone git@github.com:ViktorShadr/django-mailing-service.git
+cd django-mailing-service
 ```
 
 ### 2. Создание и активация виртуального окружения
